@@ -1,0 +1,95 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>YouTube Multiview</title>
+    <link href="style.css" rel="stylesheet">
+    <!-- <script type="module" src="yt-frame.js"></script> -->
+  </head>
+
+  <body>
+    <div>
+      <label for="url">URL:</label>
+      <input type="text"
+             id="url-input"
+             name="url"
+             required>
+      <button type="button"
+              id="load-button">
+        Load
+      </button>
+    </div>
+    <div id="videos">
+    </div>
+
+    <!-- <iframe -->
+    <!--   id="iframe" -->
+    <!--   width="50%" -->
+    <!--   src="https://www.youtube.com/embed/" -->
+    <!--   frameborder="0" -->
+    <!--   allow="accelerometer; autoplay; encrypted-media; gyroscope; -->
+    <!--          picture-in-picture" -->
+    <!--   allowfullscreen> -->
+    <!-- </iframe> -->
+
+  </body>
+
+  <script>
+    console.log("***************SCRIPT*********************")
+    const body = document.getElementsByTagName("body")[0];
+    const iframe = document.getElementById("iframe");
+    const loadButton = document.getElementById("load-button");
+    const urlInput = document.getElementById("url-input");
+    const videos = document.getElementById("videos");    
+
+    videos.style.display = "flex";
+    videos.style["flex-flow"] = "row wrap";    
+    
+    
+    let params = new
+    URLSearchParams(document.location.search.substring(1));
+    // watch is a comma separated list of YouTube video IDs
+    let watch = params.get("watch");
+    videoIDs = watch.split(",");
+
+    console.log("videoIDs: " + videoIDs);
+
+    videoIDs.forEach(id => {
+        console.log("id: " + id);
+        appendIframeForYoutubeID(id)
+    })
+    
+    // clear on reload
+    urlInput.value = ""
+
+    loadButton.onclick = function(e) {
+        console.log("Load button clicked");
+        let id = urlInput.value;
+        appendIframeForYoutubeID(id);
+    }
+
+    function appendIframeForYoutubeID(id) {
+        let iframe = createIframeForYouTubeID(id);
+        videos.appendChild(iframe);
+    }
+
+    function createIframeForYouTubeID(id) {
+        let iframe = document.createElement("iframe");
+        iframe.id = "iframe-" + id;
+        iframe.src="https://www.youtube.com/embed/" + id;
+
+        // default to two iframes per row
+        iframe.width = window.innerWidth / 2 - 4;
+        // use default 16:9 ratio
+        iframe.height = iframe.width / 16 * 9;
+        iframe.frameborder = "0";
+        iframe.allow="accelerometer; autoplay; encrypted-media; gyroscope;\
+             picture-in-picture";
+        iframe.allowfullscreen = "";
+        iframe.style.display = "block";
+        iframe.style.border = "0";        
+        return iframe;
+    }
+  </script>
+</html>
