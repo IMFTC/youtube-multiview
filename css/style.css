@@ -1,0 +1,137 @@
+html {
+    scrollbar-width: none;
+    margin: 0;
+    background-color: black;
+    color: lightgray;
+    font-family: sans-serif;
+}
+
+body {
+    margin: 0;
+}
+
+iframe {
+    border-style: none;
+}
+
+input {
+    padding: 0.5em;
+    border-width: 0;
+    margin: 0;
+    transition-property: border-color;
+    transition-duration: 200ms;
+    box-shadow: none;
+}
+
+button, select {
+    border-style: none;
+    margin: 0;
+    padding: 0.5em;
+    background: skyblue;
+    color: black;
+}
+
+button:hover, select:hover {
+    background: white;
+}
+
+button:active, select:active {
+    background: skyblue;
+}
+
+a {
+    color: white;
+}
+
+a:visited {
+    color: white;
+}
+
+#main-container {
+    display: grid;
+    width: 100%;
+}
+
+.video-stack {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.video-stack > * {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.video-overlay {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    background: rgba(255, 255, 255, 0);
+    color: black;
+    visibility: hidden;
+}
+
+.video-selector {
+    display: grid;
+    grid-gap: 2px 2px;
+    position: absolute;
+    top: 1em;
+    right: 1em;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 2px;
+    font-size: tiny;
+    z-index: 1000;
+}
+
+.video-selector-thumb {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: white;
+    font-size: smaller;
+}
+
+.video-selector-thumb:hover {
+    background: whitesmoke;
+}
+
+.video-selector-thumb-current {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: orange;
+}
+
+.video-selector-thumb-current:hover {
+    background: orange;
+}
+
+#settings {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+}
+
+#settings > div + div {
+    margin-left: 1em;
+}
+
+#footer {
+    color: lightgray;
+    width: 100%;
+    text-align: center;
+    padding: 5px;
+}
+
+#footer b {
+    color: skyblue;
+}
