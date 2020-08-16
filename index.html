@@ -59,7 +59,7 @@ const urlInput = document.getElementById("url-input");
 const urlButton = document.getElementById("url-button");
 const sizeSelect = document.getElementById("size-select");
 const editButton = document.getElementById("edit-button");
-let videoSelector = null;
+let positionSelector = null;
 
 // maps n = 0, 1, ... to the n-th videoStack
 const videoStackOrder = {};
@@ -127,7 +127,7 @@ function createVideoStack(id) {
     videoStack.appendChild(overlay);
 
     overlay.onmousemove = (mousemove) => {
-        if (videoSelector.parentNode !== overlay) {
+        if (positionSelector.parentNode !== overlay) {
             moveVideoSelector(videoStack);
         }
     }
@@ -171,12 +171,12 @@ function moveVideoSelector(videoStack) {
     let activeVideoStack = videoStack;
     let overlay = videoStack.children[1]
 
-    if (videoSelector.parentNode != overlay) {
-        overlay.appendChild(videoSelector);
+    if (positionSelector.parentNode != overlay) {
+        overlay.appendChild(positionSelector);
     }
 
-    while (videoSelector.firstChild) {
-        videoSelector.removeChild(videoSelector.firstChild)
+    while (positionSelector.firstChild) {
+        positionSelector.removeChild(positionSelector.firstChild)
     }
 
     for (let i = 0; i < videoStacks.length; i++) {
@@ -190,7 +190,7 @@ function moveVideoSelector(videoStack) {
             swapGridElementOrders(mainContainer, iSwap, i);
             moveVideoSelector(videoStack);
         }
-        videoSelector.appendChild(button);
+        positionSelector.appendChild(button);
     }
 }
 
@@ -248,7 +248,7 @@ function toggleEditMode() {
         videoStack.children[1].style.visibility = edit ? "visible" : "hidden";
     }
 
-    videoSelector.style.visibility = edit ? "visible" : "hidden";
+    positionSelector.style.visibility = edit ? "visible" : "hidden";
     editButton.style.background = edit ? "orange" : "skyblue";
 }
 
@@ -261,7 +261,7 @@ function updateGridColAndRows() {
     // ensure enough rows to fill the entire screen
     let nRows = Math.max(Math.ceil(nVideoStacks / nCols), nCols);
 
-    [mainContainer, videoSelector].forEach((gridElement) => {
+    [mainContainer, positionSelector].forEach((gridElement) => {
         gridElement.style["grid-template-columns"] = "repeat(" + nCols + ", 1fr)";
         gridElement.style["grid-template-rows"] = "repeat(" + nRows + ", 1fr)";
     })
@@ -288,24 +288,25 @@ function updateGridHeight() {
     mainContainer.style.height = newContainerHeight + "px";
     console.debug("New mainContainer height: " + newContainerHeight);
 
-    // Change videoSelector width (or height) to half of the rowWidth
-    // (or rowHeight) to always fit the videoSelector inside the
+    // Change positionSelector width (or height) to half of the rowWidth
+    // (or rowHeight) to always fit the positionSelector inside the
     // overlay.
     let dim = {width: null, height: null};
+    let sizeFactor = 1/3;
     if  (rowWidth / rowHeight < gridWidth / newContainerHeight) {
         // height for width
-        dim.width = Math.floor(rowWidth / 2);
+        dim.width = Math.floor(rowWidth * sizeFactor);
         // dim.height:dim.widht = newContainerHeight:gridWidth
         dim.height = dim.width / gridWidth * newContainerHeight;
     } else {
         // width for height
-        dim.height = Math.floor(rowHeight / 2);
+        dim.height = Math.floor(rowHeight * sizeFactor);
         // dim.height:dim.widht = newContainerHeight:gridWidth
         dim.width = dim.height / newContainerHeight * gridWidth;
     }
 
-    videoSelector.style.width = dim.width + "px";
-    videoSelector.style.height = dim.height + "px";
+    positionSelector.style.width = dim.width + "px";
+    positionSelector.style.height = dim.height + "px";
 }
 
 function updateGrid() {
@@ -326,8 +327,8 @@ window.onresize = (e) => {
 }
 
 window.onload = function() {
-    videoSelector = document.createElement("div");
-    videoSelector.className = "video-selector";
+    positionSelector = document.createElement("div");
+    positionSelector.className = "video-selector";
 
     sizeSelect.value = "fitall";
     sizeSelect.onchange = updateGrid;
