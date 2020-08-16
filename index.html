@@ -87,7 +87,13 @@ function processURL() {
     debug = (params.has("debug"));
     console.debug("Debugging mode is " + (debug ? "on" : "off"));
     let v = params.get("v");
+
+    if (!v) {
+        return;
+    }
+
     let videoIDs = extractVideoIDs(v);
+    console.log(videoIDs);
 
     console.debug("Loading videoStacks for videoIDs: " + videoIDs);
 
