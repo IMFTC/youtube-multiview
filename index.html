@@ -84,7 +84,7 @@ function extractVideoIDs(string) {
 function processURL() {
     let params = new URLSearchParams(document.location.search.substring(1));
     // v is a comma separated list of YouTube video IDs
-    debug = (params.has("debug"));
+    debug = params.has("debug");
     console.debug("Debugging mode is " + (debug ? "on" : "off"));
     let v = params.get("v");
 
@@ -93,8 +93,6 @@ function processURL() {
     }
 
     let videoIDs = extractVideoIDs(v);
-    console.log(videoIDs);
-
     console.debug("Loading videoStacks for videoIDs: " + videoIDs);
 
     videoIDs.forEach(id => {
