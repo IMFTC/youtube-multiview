@@ -1,0 +1,51 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <!-- <meta name="referrer" content="no-referrer"> -->
+    <title>YouTube Multiview</title>
+    <link href="css/style.css" rel="stylesheet">
+    <script type="text/javascript" src="js/script.js" defer></script>
+  </head>
+  <body>
+    <div id="main-container">
+      <!-- videoStacks with YouTube iframes go here -->
+    </div>
+    <div id="settings">
+      <div>
+        <label for="url-input">Add Video ID:</label>
+        <input type="text"
+               id="url-input">
+        <button type="button"
+                id="url-button">
+          Load
+        </button>
+      </div>
+      <div>
+        <label for="size-input">Number of videos on screen:</label>
+        <select id="size-select">
+          <option value="1x1">1x1</option>
+          <option value="2x2">2x2</option>
+          <option value="3x3">3x3</option>
+          <option value="4x4">4x4</option>
+          <option value="fitall">Fit all</option>
+        </select>
+      </div>
+      <div>
+        <button id="edit-button">Edit</button>
+      </div>
+    </div>
+    <div id="footer">
+      <b>YouTube Multiview</b><br> The source code for this page is hosted on <a href="https://github.com/IMFTC/youtube-multiview">GitHub</a>
+    </div>
+  </body>
+</html>
+
+
+<!--
+
+Thumbnails for videos in default resolution:
+
+https://img.youtube.com/vi/5QbM7Vsz3kg/sddefault.jpg
+
+-->
