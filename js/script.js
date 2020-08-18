@@ -1,9 +1,11 @@
-const html = document.getElementsByTagName("html")[0];
-const body = document.getElementsByTagName("body")[0];
+const html = document.querySelector("html");
+const body = document.querySelector("body");
 
-// elements containing the iframes
-const mainContainer = document.getElementById("main-container");
-const videoStacks = document.getElementsByClassName("video-stack")
+// a videoBox contains a YouTube iframe and an overlay used to display
+// controls to move videoBoxes inside the videoGrid
+const videoBoxes = document.getElementsByClassName("video-box");
+// the videoBoxGrid contains all videoBoxes
+const videoBoxGrid = document.getElementById("video-box-grid");
 
 // input elements
 const urlInput = document.getElementById("url-input");
@@ -14,10 +16,10 @@ const sizeSelectValues = ["all", "1x1", "2x2", "3x3", "4x4"];
 
 let navigator = null;
 
-// maps n = 0, 1, ... to the n-th videoStack
-const videoStackOrder = {};
+// maps n = 0, 1, ... to the n-th videoBox
+const videoBoxOrder = {};
 
-let nVideosOnScreen = 1;
+let nVideoBoxesOnScreen = 1;
 let debug = false;
 
 function fillSizeSelect() {
@@ -53,8 +55,8 @@ function processURL() {
     let v = params.get("v");
     if (v) {
         let videoIDs = extractVideoIDs(v);
-        console.debug("Loading videoStacks for videoIDs: " + videoIDs);
-        appendVideoStacksforIds(videoIDs);
+        console.debug("Loading videos for videoIDs: " + videoIDs);
+        appendVideoBoxesforIds(videoIDs);
     }
 
     // Handle dim (number of videos on screen will be dim×dim),
@@ -71,19 +73,20 @@ function processURL() {
     }
 }
 
-function appendVideoStacksforIds(idList) {
+function appendVideoBoxesforIds(idList) {
     let edit = editButton.innerHTML != "Edit";
 
-    newVideoStacks = idList.map((id, i) => {
-        let videoStack = createVideoStack(id);
-        videoStack.style.order = videoStacks.length + i;
-        videoStackOrder[videoStacks.length + i] = videoStack;
+    newVideoBoxes = idList.map((id, i) => {
+        let videoBox = createVideoBox(id);
+        videoBox.style.order = videoBoxes.length + i;
+        videoBoxOrder[videoBoxes.length + i] = videoBox;
         // set visibility to get events from the overlay
-        videoStack.querySelector(".video-overlay").style.visibility = edit ? "visible" : "hidden";
-        return videoStack;
+        videoBox.querySelector(".video-box-overlay")
+            .style.visibility = edit ? "visible" : "hidden";
+        return videoBox;
     });
 
-    mainContainer.append(...newVideoStacks);
+    videoBoxGrid.append(...newVideoBoxes);
 
     // "all" may require a new layout
     if (sizeSelect.value == "all") {
@@ -91,22 +94,22 @@ function appendVideoStacksforIds(idList) {
     }
 }
 
-function createVideoStack(id) {
-    let videoStack = document.createElement("div");
-    videoStack.className = "video-stack";
+function createVideoBox(id) {
+    let videoBox = document.createElement("div");
+    videoBox.className = "video-box";
 
     let iframe = createIframeForYouTubeID(id);
     let overlay = createOverlayForYouTubeID(id);
-    videoStack.appendChild(iframe);
-    videoStack.appendChild(overlay);
+    videoBox.appendChild(iframe);
+    videoBox.appendChild(overlay);
 
     overlay.onmousemove = (mousemove) => {
         if (navigator.parentNode !== overlay) {
-            moveNavigator(videoStack);
+            moveNavigator(videoBox);
         }
     }
 
-    return videoStack;
+    return videoBox;
 }
 
 function createIframeForYouTubeID(id) {
@@ -135,14 +138,14 @@ function createIframeForYouTubeID(id) {
 
 function createOverlayForYouTubeID(id) {
     let overlay = document.createElement("div");
-    overlay.className = "video-overlay";
+    overlay.className = "video-box-overlay";
     // overlay.innerHTML = id;
 
     return overlay;
 }
 
-function moveNavigator(videoStack) {
-    let overlay = videoStack.children[1]
+function moveNavigator(videoBox) {
+    let overlay = videoBox.children[1]
 
     if (navigator.parentNode != overlay) {
         overlay.appendChild(navigator);
@@ -152,28 +155,28 @@ function moveNavigator(videoStack) {
         navigator.removeChild(navigator.firstChild)
     }
 
-    let thisIndex = Number(videoStack.style.order);
+    let thisIndex = Number(videoBox.style.order);
 
-    for (let i = 0; i < videoStacks.length; i++) {
+    for (let i = 0; i < videoBoxes.length; i++) {
         let button = document.createElement("button");
         button.type = "button";
         button.classList.add("navigator-thumb");
-        if (i == videoStack.style.order) {
+        if (i == videoBox.style.order) {
             button.classList.add("current");
         }
 
-        let swapStackOverlay = videoStackOrder[i].querySelector(".video-overlay");
+        let swapOverlay = videoBoxOrder[i].querySelector(".video-box-overlay");
         button.onclick = _ => {
-            swapStackOverlay.classList.remove("highlight");
-            swapGridElementOrders(mainContainer, thisIndex, i);
+            swapOverlay.classList.remove("highlight");
+            swapGridElementOrders(videoBoxGrid, thisIndex, i);
             // make the navigator stay in place
-            moveNavigator(videoStackOrder[thisIndex]);
+            moveNavigator(videoBoxOrder[thisIndex]);
         }
         button.onmouseenter = (_) => {
-            swapStackOverlay.classList.add("highlight");
+            swapOverlay.classList.add("highlight");
         }
         button.onmouseleave = (_) => {
-            swapStackOverlay.classList.remove("highlight");
+            swapOverlay.classList.remove("highlight");
         }
         navigator.appendChild(button);
     }
@@ -184,26 +187,26 @@ function swapGridElementOrders(grid, order1, order2) {
     if (typeof(order1) != "number" || typeof(order2) != "number") {
         console.error("swapGridElementOrders arguments order1, order1 must be numbers");
     }
-    console.debug("Swapping videoStacks: " + order1 + " with " + order2);
+    console.debug("Swapping videoBoxes: " + order1 + " with " + order2);
     if (order1 == order2) {
         return;
     }
 
-    let videoStack1 = videoStackOrder[order1];
-    let videoStack2 = videoStackOrder[order2];
+    let videoBox1 = videoBoxOrder[order1];
+    let videoBox2 = videoBoxOrder[order2];
 
-    if (videoStack1 && videoStack2) {
-        videoStack1.style.order = order2;
-        videoStack2.style.order = order1;
+    if (videoBox1 && videoBox2) {
+        videoBox1.style.order = order2;
+        videoBox2.style.order = order1;
 
-        videoStackOrder[order1] = videoStack2;
-        videoStackOrder[order2] = videoStack1;
+        videoBoxOrder[order1] = videoBox2;
+        videoBoxOrder[order2] = videoBox1;
     }
 }
 
-function removeAllVideoStacks() {
-    while (mainContainer.firstChild) {
-        mainContainer.removeChild(mainContainer.firstChild)
+function removeAllVideoBoxes() {
+    while (videoBoxGrid.firstChild) {
+        videoBoxGrid.removeChild(videoBoxGrid.firstChild)
     }
 }
 
@@ -212,8 +215,8 @@ function processUrlInput() {
         return;
     }
 
-    let idList = extractVideoIDs(urlInput.value);
-    appendVideoStacksforIds(idList);
+    let idList = extractVideoBoxIDs(urlInput.value);
+    appendVideoBoxesforIds(idList);
 
     urlInput.value = "";
     updateGrid();
@@ -223,12 +226,12 @@ function toggleEditMode() {
     let edit = editButton.innerHTML == "Edit";
     editButton.innerHTML = edit ? "Done" : "Edit";
 
-    if (edit && videoStacks.length > 0) {
-        moveNavigator(videoStacks[0]);
+    if (edit && videoBoxes.length > 0) {
+        moveNavigator(videoBoxes[0]);
     }
 
-    for (let videoStack of videoStacks) {
-        videoStack.children[1].style.visibility = edit ? "visible" : "hidden";
+    for (let videoBox of videoBoxes) {
+        videoBox.children[1].style.visibility = edit ? "visible" : "hidden";
     }
 
     navigator.style.visibility = edit ? "visible" : "hidden";
@@ -237,14 +240,14 @@ function toggleEditMode() {
 
 // Update grid to have n rows and n columns
 function updateGridColAndRows() {
-    let nVideoStacks = mainContainer.children.length;
+    let nVideoBoxes = videoBoxGrid.children.length;
     let nCols = (sizeSelect.value == "all" ?
-                 Math.ceil(Math.sqrt(nVideoStacks)) :
+                 Math.ceil(Math.sqrt(nVideoBoxes)) :
                  sizeSelect.value[0]);
     // ensure enough rows to fill the entire screen
-    let nRows = Math.max(Math.ceil(nVideoStacks / nCols), nCols);
+    let nRows = Math.max(Math.ceil(nVideoBoxes / nCols), nCols);
 
-    [mainContainer, navigator].forEach((gridElement) => {
+    [videoBoxGrid, navigator].forEach((gridElement) => {
         gridElement.style["grid-template-columns"] = "repeat(" + nCols + ", 1fr)";
         gridElement.style["grid-template-rows"] = "repeat(" + nRows + ", 1fr)";
     })
@@ -252,40 +255,40 @@ function updateGridColAndRows() {
     console.debug("updateGridColAndRows: Setting dimension to " + nRows + "x" + nCols + ".");
 }
 
-// Adjust the height of the main container so that the selected number
+// Adjust the height of the main box so that the selected number
 // of rows fit on the screen.
 function updateGridHeight() {
     let gridWidth = html.clientWidth;
     let screenHeight = html.clientHeight;
-    let nVideoStacks = mainContainer.children.length;
+    let nVideoBoxes = videoBoxGrid.children.length;
     let nRowsOnScreen = (sizeSelect.value == "all" ?
-                         Math.ceil(Math.sqrt(nVideoStacks)) :
+                         Math.ceil(Math.sqrt(nVideoBoxes)) :
                          sizeSelect.value[0]);
-    let nTotalRows = Math.ceil(nVideoStacks / nRowsOnScreen);
+    let nTotalRows = Math.ceil(nVideoBoxes / nRowsOnScreen);
     let rowHeight = Math.floor(screenHeight / nRowsOnScreen);
     let rowWidth = Math.floor(gridWidth / nRowsOnScreen);
-    // Ensure the container's height fits all videos, but at least
+    // Ensure the box's height fits all videoBoxes, but at least
     // enough rows (can be empty) to fill the entire screen.
-    let newContainerHeight = rowHeight * Math.max(nTotalRows, nRowsOnScreen);
+    let newBoxHeight = rowHeight * Math.max(nTotalRows, nRowsOnScreen);
 
-    mainContainer.style.height = newContainerHeight + "px";
-    console.debug("New mainContainer height: " + newContainerHeight);
+    videoBoxGrid.style.height = newBoxHeight + "px";
+    console.debug("New videoBoxGrid height: " + newBoxHeight);
 
     // Change navigator width (or height) to half of the rowWidth
     // (or rowHeight) to always fit the navigator inside the
     // overlay.
     let dim = {width: null, height: null};
     let sizeFactor = 1/3;
-    if  (rowWidth / rowHeight < gridWidth / newContainerHeight) {
+    if  (rowWidth / rowHeight < gridWidth / newBoxHeight) {
         // height for width
         dim.width = Math.floor(rowWidth * sizeFactor);
-        // dim.height:dim.widht = newContainerHeight:gridWidth
-        dim.height = dim.width / gridWidth * newContainerHeight;
+        // dim.height:dim.widht = newBoxHeight:gridWidth
+        dim.height = dim.width / gridWidth * newBoxHeight;
     } else {
         // width for height
         dim.height = Math.floor(rowHeight * sizeFactor);
-        // dim.height:dim.widht = newContainerHeight:gridWidth
-        dim.width = dim.height / newContainerHeight * gridWidth;
+        // dim.height:dim.widht = newBoxHeight:gridWidth
+        dim.width = dim.height / newBoxHeight * gridWidth;
     }
 
     navigator.style.width = dim.width + "px";
