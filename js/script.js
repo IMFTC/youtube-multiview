@@ -45,27 +45,27 @@ function processURL() {
 
     let videoIDs = extractVideoIDs(v);
     console.debug("Loading videoStacks for videoIDs: " + videoIDs);
-
-    videoIDs.forEach(id => {
-        appendVideoStackForYoutubeID(id);
-    })
+    appendVideoStacksforIds(videoIDs);
 }
 
-function appendVideoStackForYoutubeID(id) {
-    let videoStack = createVideoStack(id);
-    videoStack.style.order = videoStacks.length;
-    videoStackOrder[videoStacks.length] = videoStack;
-    mainContainer.appendChild(videoStack);
-    console.debug("Added videoStack for video ID " + id);
+function appendVideoStacksforIds(idList) {
+    let edit = editButton.innerHTML != "Edit";
+
+    newVideoStacks = idList.map((id, i) => {
+        let videoStack = createVideoStack(id);
+        videoStack.style.order = videoStacks.length + i;
+        videoStackOrder[videoStacks.length + i] = videoStack;
+        // set visibility to get events from the overlay
+        videoStack.querySelector(".video-overlay").style.visibility = edit ? "visible" : "hidden";
+        return videoStack;
+    });
+
+    mainContainer.append(...newVideoStacks);
 
     // "fitall" may require a new layout
     if (sizeSelect.value == "fitall") {
         updateGridColAndRows();
     }
-
-    // TODO: Use a proper state object
-    let edit = editButton.innerHTML != "Edit";
-    videoStack.children[1].style.visibility = edit ? "visible" : "hidden";
 }
 
 function createVideoStack(id) {
@@ -178,10 +178,8 @@ function processUrlInput() {
         return;
     }
 
-    let videoIDs = extractVideoIDs(urlInput.value);
-    videoIDs.forEach(id => {
-        appendVideoStackForYoutubeID(id);
-    })
+    let idList = extractVideoIDs(urlInput.value);
+    appendVideoStacksforIds(idList);
 
     urlInput.value = "";
     updateGrid();
