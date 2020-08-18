@@ -62,7 +62,7 @@ function processURL() {
     let dim = params.get("dim");
     if (dim) {
         console.debug("Handling URL parameter dim=\"" + dim + "\"");
-        if (!(dim in sizeSelectValues)) {
+        if (sizeSelectValues.indexOf(dim) < 0) {
             console.error("Invalid value for dim parameter: " + dim
                           + ". Must be one of " + sizeSelectValues);
         } else {
