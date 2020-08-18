@@ -18,7 +18,7 @@ let positionSelector = null;
 const videoStackOrder = {};
 
 let nVideosOnScreen = 1;
-let debug = true;
+let debug = false;
 
 function fillSizeSelect() {
     sizeSelectValues.forEach(value => {
