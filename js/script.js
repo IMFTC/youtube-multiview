@@ -12,7 +12,7 @@ const sizeSelect = document.getElementById("size-select");
 const editButton = document.getElementById("edit-button");
 const sizeSelectValues = ["all", "1x1", "2x2", "3x3", "4x4"];
 
-let positionSelector = null;
+let navigator = null;
 
 // maps n = 0, 1, ... to the n-th videoStack
 const videoStackOrder = {};
@@ -101,8 +101,8 @@ function createVideoStack(id) {
     videoStack.appendChild(overlay);
 
     overlay.onmousemove = (mousemove) => {
-        if (positionSelector.parentNode !== overlay) {
-            moveVideoSelector(videoStack);
+        if (navigator.parentNode !== overlay) {
+            moveNavigator(videoStack);
         }
     }
 
@@ -141,30 +141,30 @@ function createOverlayForYouTubeID(id) {
     return overlay;
 }
 
-function moveVideoSelector(videoStack) {
+function moveNavigator(videoStack) {
     let activeVideoStack = videoStack;
     let overlay = videoStack.children[1]
 
-    if (positionSelector.parentNode != overlay) {
-        overlay.appendChild(positionSelector);
+    if (navigator.parentNode != overlay) {
+        overlay.appendChild(navigator);
     }
 
-    while (positionSelector.firstChild) {
-        positionSelector.removeChild(positionSelector.firstChild)
+    while (navigator.firstChild) {
+        navigator.removeChild(navigator.firstChild)
     }
 
     for (let i = 0; i < videoStacks.length; i++) {
         let button = document.createElement("button");
         button.type = "button";
         button.className = (i != activeVideoStack.style.order
-                            ? "video-selector-thumb"
-                            : "video-selector-thumb-current");
+                            ? "navigator-thumb"
+                            : "navigator-thumb-current");
         let iSwap = Number(activeVideoStack.style.order);
         button.onclick = (click) => {
             swapGridElementOrders(mainContainer, iSwap, i);
-            moveVideoSelector(videoStack);
+            moveNavigator(videoStack);
         }
-        positionSelector.appendChild(button);
+        navigator.appendChild(button);
     }
 }
 
@@ -213,14 +213,14 @@ function toggleEditMode() {
     editButton.innerHTML = edit ? "Done" : "Edit";
 
     if (edit && videoStacks.length > 0) {
-        moveVideoSelector(videoStacks[0]);
+        moveNavigator(videoStacks[0]);
     }
 
     for (let videoStack of videoStacks) {
         videoStack.children[1].style.visibility = edit ? "visible" : "hidden";
     }
 
-    positionSelector.style.visibility = edit ? "visible" : "hidden";
+    navigator.style.visibility = edit ? "visible" : "hidden";
     editButton.style.background = edit ? "orange" : "skyblue";
 }
 
@@ -233,7 +233,7 @@ function updateGridColAndRows() {
     // ensure enough rows to fill the entire screen
     let nRows = Math.max(Math.ceil(nVideoStacks / nCols), nCols);
 
-    [mainContainer, positionSelector].forEach((gridElement) => {
+    [mainContainer, navigator].forEach((gridElement) => {
         gridElement.style["grid-template-columns"] = "repeat(" + nCols + ", 1fr)";
         gridElement.style["grid-template-rows"] = "repeat(" + nRows + ", 1fr)";
     })
@@ -260,8 +260,8 @@ function updateGridHeight() {
     mainContainer.style.height = newContainerHeight + "px";
     console.debug("New mainContainer height: " + newContainerHeight);
 
-    // Change positionSelector width (or height) to half of the rowWidth
-    // (or rowHeight) to always fit the positionSelector inside the
+    // Change navigator width (or height) to half of the rowWidth
+    // (or rowHeight) to always fit the navigator inside the
     // overlay.
     let dim = {width: null, height: null};
     let sizeFactor = 1/3;
@@ -277,8 +277,8 @@ function updateGridHeight() {
         dim.width = dim.height / newContainerHeight * gridWidth;
     }
 
-    positionSelector.style.width = dim.width + "px";
-    positionSelector.style.height = dim.height + "px";
+    navigator.style.width = dim.width + "px";
+    navigator.style.height = dim.height + "px";
 }
 
 function updateGrid() {
@@ -299,15 +299,15 @@ window.onresize = (e) => {
 }
 
 window.onload = function() {
-    positionSelector = document.createElement("div");
-    positionSelector.className = "video-selector";
+    navigator = document.createElement("div");
+    navigator.className = "navigator";
 
     fillSizeSelect();
     sizeSelect.onchange = updateGrid;
 
+    editButton.style.width = Math.max("Edit".length, "Done".length) + 1 + "em";
+    editButton.onclick = toggleEditMode;
+
     processURL();
     updateGrid()
 }
-
-editButton.style.width = Math.max("Edit".length, "Done".length) + 1 + "em";
-editButton.onclick = toggleEditMode;
