@@ -152,16 +152,28 @@ function moveNavigator(videoStack) {
         navigator.removeChild(navigator.firstChild)
     }
 
+    let thisIndex = Number(videoStack.style.order);
+
     for (let i = 0; i < videoStacks.length; i++) {
         let button = document.createElement("button");
         button.type = "button";
-        button.className = (i != videoStack.style.order
-                            ? "navigator-thumb"
-                            : "navigator-thumb-current");
-        let iSwap = Number(videoStack.style.order);
-        button.onclick = (click) => {
-            swapGridElementOrders(mainContainer, iSwap, i);
-            moveNavigator(videoStackOrder[iSwap]);
+        button.classList.add("navigator-thumb");
+        if (i == videoStack.style.order) {
+            button.classList.add("current");
+        }
+
+        let swapStackOverlay = videoStackOrder[i].querySelector(".video-overlay");
+        button.onclick = _ => {
+            swapStackOverlay.classList.remove("highlight");
+            swapGridElementOrders(mainContainer, thisIndex, i);
+            // make the navigator stay in place
+            moveNavigator(videoStackOrder[thisIndex]);
+        }
+        button.onmouseenter = (_) => {
+            swapStackOverlay.classList.add("highlight");
+        }
+        button.onmouseleave = (_) => {
+            swapStackOverlay.classList.remove("highlight");
         }
         navigator.appendChild(button);
     }

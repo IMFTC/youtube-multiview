@@ -70,9 +70,18 @@ a:visited {
     width: 100%;
     height: 100%;
     position: relative;
-    background: rgba(255, 255, 255, 0);
+    background: rgba(255, 255, 255, 0.3);
     color: black;
     visibility: hidden;
+    box-sizing: border-box;
+    border-width: 5px;
+    border-style: solid;
+    border-color: rgba(255, 255, 255, 0);
+}
+
+.video-overlay.highlight {
+    background: rgba(255, 165, 0, 0.3);
+    border-color: orange;
 }
 
 .navigator {
@@ -95,21 +104,15 @@ a:visited {
     font-size: smaller;
 }
 
+.navigator-thumb.current {
+    background: orange;
+}
+
 .navigator-thumb:hover {
     background: whitesmoke;
 }
 
-.navigator-thumb-current {
-    width: 100%;
-    height: 100%;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: orange;
-}
-
-.navigator-thumb-current:hover {
+.navigator-thumb.current:hover {
     background: orange;
 }
 
