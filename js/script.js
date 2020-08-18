@@ -10,6 +10,8 @@ const urlInput = document.getElementById("url-input");
 const urlButton = document.getElementById("url-button");
 const sizeSelect = document.getElementById("size-select");
 const editButton = document.getElementById("edit-button");
+const sizeSelectValues = ["all", "1x1", "2x2", "3x3", "4x4"];
+
 let positionSelector = null;
 
 // maps n = 0, 1, ... to the n-th videoStack
@@ -17,6 +19,15 @@ const videoStackOrder = {};
 
 let nVideosOnScreen = 1;
 let debug = true;
+
+function fillSizeSelect() {
+    sizeSelectValues.forEach(value => {
+        let option = document.createElement("option");
+        option.value = value;
+        option.innerHTML = value;
+        sizeSelect.appendChild(option);
+    });
+}
 
 function extractYouTubeID(url){
     url = url.split(/(vi\/|v=|\/v\/|youtu\.be\/|\/embed\/)/);
@@ -37,15 +48,27 @@ function processURL() {
     // v is a comma separated list of YouTube video IDs
     debug = params.has("debug");
     console.debug("Debugging mode is " + (debug ? "on" : "off"));
-    let v = params.get("v");
 
-    if (!v) {
-        return;
+    // handle video ids
+    let v = params.get("v");
+    if (v) {
+        let videoIDs = extractVideoIDs(v);
+        console.debug("Loading videoStacks for videoIDs: " + videoIDs);
+        appendVideoStacksforIds(videoIDs);
     }
 
-    let videoIDs = extractVideoIDs(v);
-    console.debug("Loading videoStacks for videoIDs: " + videoIDs);
-    appendVideoStacksforIds(videoIDs);
+    // Handle dim (number of videos on screen will be dim×dim),
+    // defaults to the first option
+    let dim = params.get("dim");
+    if (dim) {
+        console.debug("Handling URL parameter dim=\"" + dim + "\"");
+        if (!(dim in sizeSelectValues)) {
+            console.error("Invalid value for dim parameter: " + dim
+                          + ". Must be one of " + sizeSelectValues);
+        } else {
+            sizeSelect.value = dim;
+        }
+    }
 }
 
 function appendVideoStacksforIds(idList) {
@@ -62,8 +85,8 @@ function appendVideoStacksforIds(idList) {
 
     mainContainer.append(...newVideoStacks);
 
-    // "fitall" may require a new layout
-    if (sizeSelect.value == "fitall") {
+    // "all" may require a new layout
+    if (sizeSelect.value == "all") {
         updateGridColAndRows();
     }
 }
@@ -204,7 +227,7 @@ function toggleEditMode() {
 // Update grid to have n rows and n columns
 function updateGridColAndRows() {
     let nVideoStacks = mainContainer.children.length;
-    let nCols = (sizeSelect.value == "fitall" ?
+    let nCols = (sizeSelect.value == "all" ?
                  Math.ceil(Math.sqrt(nVideoStacks)) :
                  sizeSelect.value[0]);
     // ensure enough rows to fill the entire screen
@@ -224,7 +247,7 @@ function updateGridHeight() {
     let gridWidth = html.clientWidth;
     let screenHeight = html.clientHeight;
     let nVideoStacks = mainContainer.children.length;
-    let nRowsOnScreen = (sizeSelect.value == "fitall" ?
+    let nRowsOnScreen = (sizeSelect.value == "all" ?
                          Math.ceil(Math.sqrt(nVideoStacks)) :
                          sizeSelect.value[0]);
     let nTotalRows = Math.ceil(nVideoStacks / nRowsOnScreen);
@@ -279,7 +302,7 @@ window.onload = function() {
     positionSelector = document.createElement("div");
     positionSelector.className = "video-selector";
 
-    sizeSelect.value = "fitall";
+    fillSizeSelect();
     sizeSelect.onchange = updateGrid;
 
     processURL();
