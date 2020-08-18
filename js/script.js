@@ -142,7 +142,6 @@ function createOverlayForYouTubeID(id) {
 }
 
 function moveNavigator(videoStack) {
-    let activeVideoStack = videoStack;
     let overlay = videoStack.children[1]
 
     if (navigator.parentNode != overlay) {
@@ -156,13 +155,13 @@ function moveNavigator(videoStack) {
     for (let i = 0; i < videoStacks.length; i++) {
         let button = document.createElement("button");
         button.type = "button";
-        button.className = (i != activeVideoStack.style.order
+        button.className = (i != videoStack.style.order
                             ? "navigator-thumb"
                             : "navigator-thumb-current");
-        let iSwap = Number(activeVideoStack.style.order);
+        let iSwap = Number(videoStack.style.order);
         button.onclick = (click) => {
             swapGridElementOrders(mainContainer, iSwap, i);
-            moveNavigator(videoStack);
+            moveNavigator(videoStackOrder[iSwap]);
         }
         navigator.appendChild(button);
     }
