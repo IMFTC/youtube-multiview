@@ -156,18 +156,24 @@ function createOverlayForYouTubeID(id) {
 function deleteVideoBox(videoBox) {
     let n = Number(videoBox.style.order);
     console.debug("Deleting videoBox number " + n);
-    for (let i = n; i < videoBoxes.length - 1; i++) {
+
+    videoBoxGrid.removeChild(videoBox);
+
+    // closing the gap at videoBoxOrder[n]
+    for (let i = n; i < videoBoxes.length; i++) {
         videoBoxOrder[i] = videoBoxOrder[i + 1];
         videoBoxOrder[i].style.order = i;
     }
-
+    //  delete previously highest key
     delete videoBoxOrder[videoBoxes.length];
-    videoBoxGrid.removeChild(videoBox);
 
     if (sizeSelect.value == "all") {
         updateGridColAndRows();
     }
-    if (videoBoxes.length > 0) {
+
+    // keep the navigator in place if the deleted videoBox was
+    // replaced by a successor
+    if (videoBoxOrder[n]) {
         moveNavigator(videoBoxOrder[n]);
     }
     console.debug("New videoBoxOrder: ", videoBoxOrder);
