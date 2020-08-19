@@ -19,7 +19,6 @@ let navigator = null;
 // maps n = 0, 1, ... to the n-th videoBox
 const videoBoxOrder = {};
 
-let nVideoBoxesOnScreen = 1;
 let debug = false;
 
 function fillSizeSelect() {
@@ -57,6 +56,7 @@ function processURL() {
         let videoIDs = extractVideoIDs(v);
         console.debug("Loading videos for videoIDs: " + videoIDs);
         appendVideoBoxesforIds(videoIDs);
+        console.log("processUrlInput, videoBoxOrder:", videoBoxOrder);
     }
 
     // Handle dim (number of videos on screen will be dim×dim),
@@ -141,7 +141,36 @@ function createOverlayForYouTubeID(id) {
     overlay.className = "video-box-overlay";
     // overlay.innerHTML = id;
 
+    let deleteButton = document.createElement("button");
+    deleteButton.innerHTML = "Remove";
+    deleteButton.className = "delete-button";
+    deleteButton.onclick = (_) => {
+        deleteVideoBox(overlay.parentNode);
+    };
+
+    overlay.appendChild(deleteButton);
+
     return overlay;
+}
+
+function deleteVideoBox(videoBox) {
+    let n = Number(videoBox.style.order);
+    console.debug("Deleting videoBox number " + n);
+    for (let i = n; i < videoBoxes.length - 1; i++) {
+        videoBoxOrder[i] = videoBoxOrder[i + 1];
+        videoBoxOrder[i].style.order = i;
+    }
+
+    delete videoBoxOrder[videoBoxes.length];
+    videoBoxGrid.removeChild(videoBox);
+
+    if (sizeSelect.value == "all") {
+        updateGridColAndRows();
+    }
+    if (videoBoxes.length > 0) {
+        moveNavigator(videoBoxOrder[n]);
+    }
+    console.debug("New videoBoxOrder: ", videoBoxOrder);
 }
 
 function moveNavigator(videoBox) {
@@ -152,7 +181,7 @@ function moveNavigator(videoBox) {
     }
 
     while (navigator.firstChild) {
-        navigator.removeChild(navigator.firstChild)
+        navigator.removeChild(navigator.firstChild);
     }
 
     let thisIndex = Number(videoBox.style.order);
@@ -162,21 +191,23 @@ function moveNavigator(videoBox) {
         button.type = "button";
         button.classList.add("navigator-thumb");
         if (i == videoBox.style.order) {
+            // the button that corresponds to the videoBox in which
+            // the navigator currently is
             button.classList.add("current");
-        }
-
-        let swapOverlay = videoBoxOrder[i].querySelector(".video-box-overlay");
-        button.onclick = _ => {
-            swapOverlay.classList.remove("highlight");
-            swapGridElementOrders(videoBoxGrid, thisIndex, i);
-            // make the navigator stay in place
-            moveNavigator(videoBoxOrder[thisIndex]);
-        }
-        button.onmouseenter = (_) => {
-            swapOverlay.classList.add("highlight");
-        }
-        button.onmouseleave = (_) => {
-            swapOverlay.classList.remove("highlight");
+        } else {
+            let swapOverlay = videoBoxOrder[i].querySelector(".video-box-overlay");
+            button.onclick = _ => {
+                swapOverlay.classList.remove("highlight");
+                swapGridElementOrders(videoBoxGrid, thisIndex, i);
+                // make the navigator stay in place
+                moveNavigator(videoBox);
+            }
+            button.onmouseenter = (_) => {
+                swapOverlay.classList.add("highlight");
+            }
+            button.onmouseleave = (_) => {
+                swapOverlay.classList.remove("highlight");
+            }
         }
         navigator.appendChild(button);
     }
