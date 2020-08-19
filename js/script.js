@@ -56,7 +56,6 @@ function processURL() {
         let videoIDs = extractVideoIDs(v);
         console.debug("Loading videos for videoIDs: " + videoIDs);
         appendVideoBoxesforIds(videoIDs);
-        console.log("processUrlInput, videoBoxOrder:", videoBoxOrder);
     }
 
     // Handle dim (number of videos on screen will be dim×dim),
