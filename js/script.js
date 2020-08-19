@@ -166,9 +166,7 @@ function deleteVideoBox(videoBox) {
     //  delete previously highest key
     delete videoBoxOrder[videoBoxes.length];
 
-    if (sizeSelect.value == "all") {
-        updateGridColAndRows();
-    }
+    updateGrid();
 
     // keep the navigator in place if the deleted videoBox was
     // replaced by a successor
