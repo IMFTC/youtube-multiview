@@ -215,7 +215,7 @@ function processUrlInput() {
         return;
     }
 
-    let idList = extractVideoBoxIDs(urlInput.value);
+    let idList = extractVideoIDs(urlInput.value);
     appendVideoBoxesforIds(idList);
 
     urlInput.value = "";
