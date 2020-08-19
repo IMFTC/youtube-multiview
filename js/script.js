@@ -202,10 +202,11 @@ function moveNavigator(videoBox) {
         } else {
             let swapOverlay = videoBoxOrder[i].querySelector(".video-box-overlay");
             button.onclick = _ => {
+                overlay.classList.add("highlight");
                 swapOverlay.classList.remove("highlight");
                 swapGridElementOrders(videoBoxGrid, thisIndex, i);
                 // make the navigator stay in place
-                moveNavigator(videoBox);
+                moveNavigator(videoBoxOrder[thisIndex]);
             }
             button.onmouseenter = (_) => {
                 swapOverlay.classList.add("highlight");
