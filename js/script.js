@@ -91,6 +91,8 @@ function appendVideoBoxesforIds(idList) {
     if (sizeSelect.value == "all") {
         updateGridColAndRows();
     }
+
+    updateUrl();
 }
 
 function createVideoBox(id) {
@@ -174,6 +176,7 @@ function deleteVideoBox(videoBox) {
         moveNavigator(videoBoxOrder.get(n));
     }
     console.debug("New videoBoxOrder: ", videoBoxOrder);
+    updateUrl();
 }
 
 function moveNavigator(videoBox) {
@@ -335,6 +338,44 @@ function updateGrid() {
     updateGridHeight();
 }
 
+function onSizeSelectChange() {
+    updateGrid();
+    updateUrl();
+}
+
+// Update the browsing history by appending an URL that reflects the
+// currently added videos and page settings.
+function updateUrl() {
+    let addVparam = videoBoxOrder.size > 0
+
+    // this is needed so it works if the page is on the local file
+    // system.
+    // file:///home/user/youtube-multiview/watch?v=1,2,3
+    let fullPath = document.URL.split("?")[0];
+    let newUrl = fullPath
+    // Add ?v= parameter
+    if (addVparam) {
+        newUrl += "?v="
+        let ids = [];
+        for (let i = 0; i < videoBoxOrder.size; i++) {
+            // get the id from the src property of the iframe
+            let videoBox = videoBoxOrder.get(i);
+            let iframeUrl = videoBox.querySelector("iframe").src;
+            let id = extractYouTubeID(iframeUrl);
+
+            // TODO: get the id in debug mode when the iframe has no
+            // .src attribute so we always push the id
+            ids.push(id || ("debug-" + i));
+        }
+        newUrl += ids.join(",");
+    }
+
+    // dim= parameter
+    newUrl += (addVparam ? "&" : "?") + "dim=" + sizeSelect.value;
+    console.debug("Adding to history: " + newUrl);
+    history.replaceState({}, "", newUrl);
+}
+
 // connect functions
 urlButton.onclick = processUrlInput;
 urlInput.addEventListener('keydown', (e) => {
@@ -352,7 +393,7 @@ window.onload = function() {
     navigator.className = "navigator";
 
     fillSizeSelect();
-    sizeSelect.onchange = updateGrid;
+    sizeSelect.onchange = onSizeSelectChange;
 
     editButton.style.width = Math.max("Edit".length, "Done".length) + 1 + "em";
     editButton.onclick = toggleEditMode;
