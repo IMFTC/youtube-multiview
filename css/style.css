@@ -1,8 +1,8 @@
 html {
     scrollbar-width: none;
     margin: 0;
-    background-color: black;
-    color: lightgray;
+    background: rgb(240, 240, 240);
+    color: black;
     font-family: sans-serif;
 }
 
@@ -14,17 +14,26 @@ iframe {
     border-style: none;
 }
 
+.input-group {
+    padding: 5px;
+
+}
+
+.input-group > label {
+    margin: 0 0.5em;
+}
+
 input {
     padding: 0.5em;
     border-width: 0;
     margin: 0;
-    transition-property: border-color;
-    transition-duration: 200ms;
-    box-shadow: none;
+    border-radius: 5px;
 }
 
 button, select {
+    position: relative;
     border-style: none;
+    border-radius: 5px;
     margin: 0;
     padding: 0.5em;
     background: skyblue;
@@ -32,11 +41,11 @@ button, select {
 }
 
 button:hover, select:hover {
-    background: white;
+    filter: brightness(0.9);
 }
 
 button:active, select:active {
-    background: skyblue;
+    filter: brightness(1.1);
 }
 
 button.delete-button {
@@ -46,7 +55,7 @@ button.delete-button {
     left: 0;
 }
 
-button.delete-button:active{
+button.depressed {
     background: orange;
 }
 
@@ -59,6 +68,7 @@ a:visited {
 }
 
 #video-box-grid {
+    background: black;
     display: grid;
     width: 100%;
 }
@@ -114,6 +124,7 @@ a:visited {
     align-items: center;
     background: white;
     font-size: smaller;
+    border-radius: 0;
 }
 
 .navigator-thumb.current {
@@ -134,6 +145,10 @@ a:visited {
     justify-content: center;
     align-items: center;
     padding: 10px;
+    border-style: solid;
+    border-width: 5px 0 0 0;
+    border-color: skyblue;
+    padding: 1em;
 }
 
 #settings > div + div {
@@ -141,12 +156,16 @@ a:visited {
 }
 
 #footer {
-    color: lightgray;
+    color: darkgray;
     width: 100%;
     text-align: center;
     padding: 5px;
 }
 
 #footer b {
+    color: skyblue;
+}
+
+#footer a {
     color: skyblue;
 }

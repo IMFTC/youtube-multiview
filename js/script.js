@@ -73,7 +73,7 @@ function processURL() {
 }
 
 function appendVideoBoxesforIds(idList) {
-    let edit = editButton.innerHTML != "Edit";
+    let edit = editButton.classList.contains("depressed");
 
     newVideoBoxes = idList.map((id, i) => {
         let videoBox = createVideoBox(id);
@@ -262,8 +262,7 @@ function processUrlInput() {
 }
 
 function toggleEditMode() {
-    let edit = editButton.innerHTML == "Edit";
-    editButton.innerHTML = edit ? "Done" : "Edit";
+    let edit = !editButton.classList.contains("depressed");
 
     if (edit && videoBoxes.length > 0) {
         moveNavigator(videoBoxes[0]);
@@ -274,7 +273,11 @@ function toggleEditMode() {
     }
 
     navigator.style.visibility = edit ? "visible" : "hidden";
-    editButton.style.background = edit ? "orange" : "skyblue";
+    if (edit)  {
+        editButton.classList.add("depressed");
+    } else {
+        editButton.classList.remove("depressed");
+    }
 }
 
 // Update grid to have n rows and n columns
@@ -408,7 +411,6 @@ window.onload = function() {
     fillSizeSelect();
     sizeSelect.onchange = onSizeSelectChange;
 
-    editButton.style.width = Math.max("Edit".length, "Done".length) + 1 + "em";
     editButton.onclick = toggleEditMode;
 
     processURL();
