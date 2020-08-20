@@ -17,7 +17,7 @@ const sizeSelectValues = ["all", "1x1", "2x2", "3x3", "4x4"];
 let navigator = null;
 
 // maps n = 0, 1, ... to the n-th videoBox
-const videoBoxOrder = {};
+const videoBoxOrder = new Map();
 
 let debug = false;
 
@@ -78,7 +78,7 @@ function appendVideoBoxesforIds(idList) {
     newVideoBoxes = idList.map((id, i) => {
         let videoBox = createVideoBox(id);
         videoBox.style.order = videoBoxes.length + i;
-        videoBoxOrder[videoBoxes.length + i] = videoBox;
+        videoBoxOrder.set(videoBoxes.length + i, videoBox);
         // set visibility to get events from the overlay
         videoBox.querySelector(".video-box-overlay")
             .style.visibility = edit ? "visible" : "hidden";
@@ -158,20 +158,20 @@ function deleteVideoBox(videoBox) {
 
     videoBoxGrid.removeChild(videoBox);
 
-    // closing the gap at videoBoxOrder[n]
+    // closing the gap at videoBoxOrder.get(n)
     for (let i = n; i < videoBoxes.length; i++) {
-        videoBoxOrder[i] = videoBoxOrder[i + 1];
-        videoBoxOrder[i].style.order = i;
+        videoBoxOrder.set(i, videoBoxOrder.get(i + 1));
+        videoBoxOrder.get(i).style.order = i;
     }
     //  delete previously highest key
-    delete videoBoxOrder[videoBoxes.length];
+    videoBoxOrder.delete(videoBoxes.length);
 
     updateGrid();
 
     // keep the navigator in place if the deleted videoBox was
     // replaced by a successor
-    if (videoBoxOrder[n]) {
-        moveNavigator(videoBoxOrder[n]);
+    if (videoBoxOrder.has(n)) {
+        moveNavigator(videoBoxOrder.get(n));
     }
     console.debug("New videoBoxOrder: ", videoBoxOrder);
 }
@@ -198,13 +198,13 @@ function moveNavigator(videoBox) {
             // the navigator currently is
             button.classList.add("current");
         } else {
-            let swapOverlay = videoBoxOrder[i].querySelector(".video-box-overlay");
+            let swapOverlay = videoBoxOrder.get(i).querySelector(".video-box-overlay");
             button.onclick = _ => {
                 overlay.classList.add("highlight");
                 swapOverlay.classList.remove("highlight");
                 swapGridElementOrders(videoBoxGrid, thisIndex, i);
                 // make the navigator stay in place
-                moveNavigator(videoBoxOrder[thisIndex]);
+                moveNavigator(videoBoxOrder.get(thisIndex));
             }
             button.onmouseenter = (_) => {
                 swapOverlay.classList.add("highlight");
@@ -227,15 +227,15 @@ function swapGridElementOrders(grid, order1, order2) {
         return;
     }
 
-    let videoBox1 = videoBoxOrder[order1];
-    let videoBox2 = videoBoxOrder[order2];
+    let videoBox1 = videoBoxOrder.get(order1);
+    let videoBox2 = videoBoxOrder.get(order2);
 
     if (videoBox1 && videoBox2) {
         videoBox1.style.order = order2;
         videoBox2.style.order = order1;
 
-        videoBoxOrder[order1] = videoBox2;
-        videoBoxOrder[order2] = videoBox1;
+        videoBoxOrder.set(order1, videoBox2);
+        videoBoxOrder.set(order2, videoBox1);
     }
 }
 
