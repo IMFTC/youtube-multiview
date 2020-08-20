@@ -280,9 +280,12 @@ function toggleEditMode() {
 // Update grid to have n rows and n columns
 function updateGridColAndRows() {
     let nVideoBoxes = videoBoxGrid.children.length;
-    let nCols = (sizeSelect.value == "all" ?
-                 Math.ceil(Math.sqrt(nVideoBoxes)) :
-                 sizeSelect.value[0]);
+    // dim= "nxn" or "all"
+    let n = (sizeSelect.value == "all" ?
+             Math.ceil(Math.sqrt(nVideoBoxes)) :
+             Number(sizeSelect.value[0]))
+    let nCols = Math.max(1, n);
+
     // ensure enough rows to fill the entire screen
     let nRows = Math.max(Math.ceil(nVideoBoxes / nCols), nCols);
 
@@ -300,9 +303,18 @@ function updateGridHeight() {
     let gridWidth = html.clientWidth;
     let screenHeight = html.clientHeight;
     let nVideoBoxes = videoBoxGrid.children.length;
+
+    // no videoBoxes
+    if (nVideoBoxes == 0) {
+        videoBoxGrid.style.height = "0px";
+
+        return;
+    }
+
+    // at least one videoBox
     let nRowsOnScreen = (sizeSelect.value == "all" ?
                          Math.ceil(Math.sqrt(nVideoBoxes)) :
-                         sizeSelect.value[0]);
+                         Number(sizeSelect.value[0]))
     let nTotalRows = Math.ceil(nVideoBoxes / nRowsOnScreen);
     let rowHeight = Math.floor(screenHeight / nRowsOnScreen);
     let rowWidth = Math.floor(gridWidth / nRowsOnScreen);
@@ -316,7 +328,7 @@ function updateGridHeight() {
     // Change navigator width (or height) to half of the rowWidth
     // (or rowHeight) to always fit the navigator inside the
     // overlay.
-    let dim = {width: null, height: null};
+    let dim = {};
     let sizeFactor = 1/3;
     if  (rowWidth / rowHeight < gridWidth / newBoxHeight) {
         // height for width
@@ -326,7 +338,7 @@ function updateGridHeight() {
     } else {
         // width for height
         dim.height = Math.floor(rowHeight * sizeFactor);
-        // dim.height:dim.widht = newBoxHeight:gridWidth
+        // dim.height / dim.widht = newBoxHeight / gridWidth
         dim.width = dim.height / newBoxHeight * gridWidth;
     }
 
