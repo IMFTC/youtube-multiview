@@ -264,10 +264,6 @@ function processUrlInput() {
 function toggleEditMode() {
     let edit = !editButton.classList.contains("depressed");
 
-    if (edit && videoBoxes.length > 0) {
-        moveNavigator(videoBoxes[0]);
-    }
-
     for (let videoBox of videoBoxes) {
         videoBox.children[1].style.visibility = edit ? "visible" : "hidden";
     }
