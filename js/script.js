@@ -208,6 +208,7 @@ function moveNavigator(videoBox) {
                 swapGridElementOrders(videoBoxGrid, thisIndex, i);
                 // make the navigator stay in place
                 moveNavigator(videoBoxOrder.get(thisIndex));
+                updateUrl();
             }
             button.onmouseenter = (_) => {
                 swapOverlay.classList.add("highlight");
