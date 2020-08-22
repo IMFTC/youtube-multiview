@@ -128,10 +128,12 @@ function createIframeForYouTubeID(id) {
     }
 
     iframe.frameborder = "0";
-    iframe.allow="accelerometer; autoplay; encrypted-media; "
-        + "gyroscope; picture-in-picture; fullscreen";
+    // iframe.sandbox = "allow-scripts allow-same-origin";
 
-    // this works for firefox, not tested with other browsers
+    // The following line is equivalent to calling
+    // iframe.setAttribute("allowfullscreen", ""), see the
+    // 'DOM interface' section at
+    // https://html.spec.whatwg.org/#the-iframe-element.
     iframe.allowFullscreen = true;
 
     return iframe;
