@@ -180,10 +180,10 @@ function deleteVideoBox(videoBox) {
 }
 
 function moveNavigator(videoBox) {
-    let overlay = videoBox.children[1]
+    let thisOverlay = videoBox.children[1]
 
-    if (navigator.parentNode != overlay) {
-        overlay.appendChild(navigator);
+    if (navigator.parentNode != thisOverlay) {
+        thisOverlay.appendChild(navigator);
     }
 
     while (navigator.firstChild) {
@@ -196,25 +196,28 @@ function moveNavigator(videoBox) {
         let button = document.createElement("button");
         button.type = "button";
         button.classList.add("navigator-thumb");
+        let overlay =  videoBoxOrder.get(i).querySelector(".video-box-overlay");
+        let id = extractYouTubeID(overlay.parentNode.querySelector("iframe").src);
+        button.style["background-image"] = "url(https://img.youtube.com/vi/" + id + "/sddefault.jpg)";
+
         if (i == videoBox.style.order) {
             // the button that corresponds to the videoBox in which
             // the navigator currently is
             button.classList.add("current");
         } else {
-            let swapOverlay = videoBoxOrder.get(i).querySelector(".video-box-overlay");
-            button.onclick = _ => {
-                overlay.classList.add("highlight");
-                swapOverlay.classList.remove("highlight");
+            button.onclick = (_) => {
+                thisOverlay.classList.add("highlight");
+                overlay.classList.remove("highlight");
                 swapGridElementOrders(videoBoxGrid, thisIndex, i);
                 // make the navigator stay in place
                 moveNavigator(videoBoxOrder.get(thisIndex));
                 updateUrl();
             }
             button.onmouseenter = (_) => {
-                swapOverlay.classList.add("highlight");
+                overlay.classList.add("highlight");
             }
             button.onmouseleave = (_) => {
-                swapOverlay.classList.remove("highlight");
+                overlay.classList.remove("highlight");
             }
         }
         navigator.appendChild(button);

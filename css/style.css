@@ -41,11 +41,11 @@ button, select {
 }
 
 button:hover, select:hover {
-    filter: brightness(0.9);
+    filter: brightness(1.1);
 }
 
 button:active, select:active {
-    filter: brightness(1.1);
+    filter: brightness(0.9);
 }
 
 button.delete-button {
@@ -122,21 +122,30 @@ a:visited {
     display: flex;
     justify-content: center;
     align-items: center;
-    background: white;
     font-size: smaller;
     border-radius: 0;
+
+    box-sizing: border-box;
+    border-width: 2px;
+    border-style: solid;
+    border-color: rgba(0, 0, 0, 0);
+
+    background-color: black;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
 }
 
 .navigator-thumb.current {
-    background: orange;
+    border-color: orange;
 }
 
 .navigator-thumb:hover {
-    background: whitesmoke;
+
 }
 
 .navigator-thumb.current:hover {
-    background: orange;
+
 }
 
 #settings {
