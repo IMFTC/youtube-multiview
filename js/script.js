@@ -323,8 +323,8 @@ function updateGridHeight() {
                          Math.ceil(Math.sqrt(nVideoBoxes)) :
                          Number(sizeSelect.value[0]))
     let nTotalRows = Math.ceil(nVideoBoxes / nRowsOnScreen);
-    let rowHeight = Math.floor(screenHeight / nRowsOnScreen);
-    let rowWidth = Math.floor(gridWidth / nRowsOnScreen);
+    let rowHeight = screenHeight / nRowsOnScreen;
+    let rowWidth = gridWidth / nRowsOnScreen;
     // Ensure the box's height fits all videoBoxes, but at least
     // enough rows (can be empty) to fill the entire screen.
     let newBoxHeight = rowHeight * Math.max(nTotalRows, nRowsOnScreen);
