@@ -14,15 +14,6 @@ iframe {
     border-style: none;
 }
 
-.input-group {
-    padding: 5px;
-
-}
-
-.input-group > label {
-    margin: 0 0.5em;
-}
-
 input {
     padding: 0.5em;
     border-width: 0;
@@ -160,8 +151,28 @@ a:visited {
     padding: 1em;
 }
 
-#settings > div + div {
+#settings > .setting+.setting {
     margin-left: 1em;
+}
+
+.setting {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 5px;
+    white-space: nowrap;
+}
+
+.setting > label {
+    margin-right: 0.5em;
+}
+
+.setting > input {
+    border-radius: 5px 0 0 5px;
+}
+
+.setting > input+button {
+    border-radius: 0 5px 5px 0;
 }
 
 #footer {
