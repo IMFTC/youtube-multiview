@@ -197,8 +197,11 @@ function moveNavigator(videoBox) {
         button.type = "button";
         button.classList.add("navigator-thumb");
         let overlay =  videoBoxOrder.get(i).querySelector(".video-box-overlay");
-        let id = extractYouTubeID(overlay.parentNode.querySelector("iframe").src);
-        button.style["background-image"] = "url(https://img.youtube.com/vi/" + id + "/sddefault.jpg)";
+
+        if (!debug) {
+            let id = extractYouTubeID(overlay.parentNode.querySelector("iframe").src);
+            button.style["background-image"] = "url(https://img.youtube.com/vi/" + id + "/sddefault.jpg)";
+        }
 
         if (i == videoBox.style.order) {
             // the button that corresponds to the videoBox in which
