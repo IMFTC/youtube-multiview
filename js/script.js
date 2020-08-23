@@ -20,6 +20,7 @@ let navigator = null;
 const videoBoxOrder = new Map();
 
 let debug = false;
+let autoplay = false;
 
 function fillSizeSelect() {
     sizeSelectValues.forEach(value => {
@@ -51,25 +52,28 @@ function processURL() {
     console.debug("Debugging mode is " + (debug ? "on" : "off"));
 
     // handle video ids
-    let v = params.get("v");
-    if (v) {
-        let videoIDs = extractVideoIDs(v);
+    let vValue = params.get("v");
+    if (vValue) {
+        let videoIDs = extractVideoIDs(vValue);
         console.debug("Loading videos for videoIDs: " + videoIDs);
         appendVideoBoxesforIds(videoIDs);
     }
 
     // Handle dim (number of videos on screen will be dim×dim),
     // defaults to the first option
-    let dim = params.get("dim");
-    if (dim) {
-        console.debug("Handling URL parameter dim=\"" + dim + "\"");
-        if (sizeSelectValues.indexOf(dim) < 0) {
-            console.error("Invalid value for dim parameter: " + dim
+    let dimValue = params.get("dim");
+    if (dimValue) {
+        console.debug("Handling URL parameter dim=\"" + dimValue + "\"");
+        if (sizeSelectValues.indexOf(dimValue) < 0) {
+            console.error("Invalid value for dim parameter: " + dimValue
                           + ". Must be one of " + sizeSelectValues);
         } else {
-            sizeSelect.value = dim;
+            sizeSelect.value = dimValue;
         }
     }
+
+    // start playing videos immediatly?
+    autoplay = (params.get("autoplay") == "1");
 }
 
 function appendVideoBoxesforIds(idList) {
@@ -124,7 +128,8 @@ function createIframeForYouTubeID(id) {
             flex-direction: row; border-style: solid; border-radius: 5px; border-width: 2px;\
             border-XScolor: black;'><h1>" + id + "</h1></div>";
     } else {
-        iframe.src="https://www.youtube.com/embed/" + id;
+        iframe.src=("https://www.youtube.com/embed/" + id
+                    + "?autoplay=" + autoplay ? "1" : "0");
     }
 
     iframe.frameborder = "0";
@@ -394,6 +399,9 @@ function updateUrl() {
     newUrl += (addVparam ? "&" : "?") + "dim=" + sizeSelect.value;
     console.debug("Adding to history: " + newUrl);
     history.replaceState({}, "", newUrl);
+
+    // autoplay=(0|1) parameter
+    newUrl += "&autoplay=" + (autoplay ? "1" : "0")
 }
 
 // connect functions
