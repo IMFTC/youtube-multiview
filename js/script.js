@@ -119,29 +119,30 @@ function createVideoBox(id) {
 }
 
 function createIframeForYouTubeID(id) {
-    let iframe = document.createElement("iframe");
-    iframe.id = id;
+    let iframe;
+    let src="https://www.youtube.com/embed/" + id
+        + "?autoplay=" + (autoplay ? "1" : "0");
 
     if (debug) {
-        iframe.style.background = "skyblue";
-        iframe.srcdoc = "<div style='display: flex;\
-            justify-content: center; align-items: stretch;\
-            flex-direction: row; border-style: solid; border-radius: 5px; border-width: 2px;\
-            border-XScolor: black;'><h1>" + id + "</h1></div>";
+        // use a simple div element as an iframe placeholder
+        iframe = document.createElement("div");
+        iframe.className = "iframe-placeholder";
+        iframe.innerHTML = "&lt;iframe src=" + src + "[...] &gt;";
     } else {
-        iframe.src="https://www.youtube.com/embed/" + id
-            + "?autoplay=" + (autoplay ? "1" : "0");
+        iframe = document.createElement("iframe");
+        iframe.id = id;
+
+        iframe.src=src;
+
+        iframe.frameborder = "0";
+        // iframe.sandbox = "allow-scripts allow-same-origin";
+
+        // The following line is equivalent to calling
+        // iframe.setAttribute("allowfullscreen", ""), see the
+        // 'DOM interface' section at
+        // https://html.spec.whatwg.org/#the-iframe-element.
+        iframe.allowFullscreen = true;
     }
-
-    iframe.frameborder = "0";
-    // iframe.sandbox = "allow-scripts allow-same-origin";
-
-    // The following line is equivalent to calling
-    // iframe.setAttribute("allowfullscreen", ""), see the
-    // 'DOM interface' section at
-    // https://html.spec.whatwg.org/#the-iframe-element.
-    iframe.allowFullscreen = true;
-
     return iframe;
 }
 
@@ -386,18 +387,14 @@ function updateUrl() {
         for (let i = 0; i < videoBoxOrder.size; i++) {
             // get the id from the src property of the iframe
             let videoBox = videoBoxOrder.get(i);
-            let iframeUrl = videoBox.querySelector("iframe").src;
-            console.log("iframeUrl", iframeUrl);
+            let iframeUrl = (!debug ? videoBox.querySelector("iframe").src
+                             : videoBox.querySelector(".iframe-placeholder").innerText);
             let id = extractYouTubeID(iframeUrl);
-            console.log("id", id);
-            // TODO: get the id in debug mode when the iframe has no
-            // .src attribute so we always push the id
-            ids.push(id || ("debug-" + i));
+            ids.push(id);
         }
         console.log("Adding ids to v parameter:", ids);
         newUrl += ids.join(",");
     }
-
 
     // dim= parameter
     newUrl += (addVparam ? "&" : "?") + "dim=" + sizeSelect.value;
