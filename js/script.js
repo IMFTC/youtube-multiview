@@ -11,6 +11,7 @@ const videoBoxGrid = document.getElementById("video-box-grid");
 const urlInput = document.getElementById("url-input");
 const urlButton = document.getElementById("url-button");
 const sizeSelect = document.getElementById("size-select");
+const autoplayCheckbox = document.getElementById("autoplay-checkbox");
 const editButton = document.getElementById("edit-button");
 const sizeSelectValues = ["all", "1x1", "2x2", "3x3", "4x4"];
 
@@ -45,11 +46,16 @@ function extractVideoIDs(string) {
     return ids.map(extractYouTubeID)
 }
 
+// Resets the page to the settings in the URL
 function processURL() {
     let params = new URLSearchParams(document.location.search.substring(1));
     // v is a comma separated list of YouTube video IDs
     debug = params.has("debug");
     console.debug("Debugging mode is " + (debug ? "on" : "off"));
+
+    // start playing videos immediatly?
+    autoplay = (params.get("autoplay") == "1");
+    autoplayCheckbox.checked = autoplay;
 
     // handle video ids
     let vValue = params.get("v");
@@ -72,8 +78,9 @@ function processURL() {
         }
     }
 
-    // start playing videos immediatly?
-    autoplay = (params.get("autoplay") == "1");
+    updateGrid();
+    // Show default parameter values to the URL
+    updateUrl();
 }
 
 function appendVideoBoxesforIds(idList) {
@@ -128,8 +135,8 @@ function createIframeForYouTubeID(id) {
             flex-direction: row; border-style: solid; border-radius: 5px; border-width: 2px;\
             border-XScolor: black;'><h1>" + id + "</h1></div>";
     } else {
-        iframe.src=("https://www.youtube.com/embed/" + id
-                    + "?autoplay=" + autoplay ? "1" : "0");
+        iframe.src="https://www.youtube.com/embed/" + id
+            + "?autoplay=" + (autoplay ? "1" : "0");
     }
 
     iframe.frameborder = "0";
@@ -386,45 +393,59 @@ function updateUrl() {
             // get the id from the src property of the iframe
             let videoBox = videoBoxOrder.get(i);
             let iframeUrl = videoBox.querySelector("iframe").src;
+            console.log("iframeUrl", iframeUrl);
             let id = extractYouTubeID(iframeUrl);
-
+            console.log("id", id);
             // TODO: get the id in debug mode when the iframe has no
             // .src attribute so we always push the id
             ids.push(id || ("debug-" + i));
         }
+        console.log("Adding ids to v parameter:", ids);
         newUrl += ids.join(",");
     }
 
+
     // dim= parameter
     newUrl += (addVparam ? "&" : "?") + "dim=" + sizeSelect.value;
-    console.debug("Adding to history: " + newUrl);
-    history.replaceState({}, "", newUrl);
 
     // autoplay=(0|1) parameter
-    newUrl += "&autoplay=" + (autoplay ? "1" : "0")
+    newUrl += "&autoplay=" + (autoplay ? "1" : "0");
+
+    // debug parameter (no values recognized)
+    newUrl += debug ? "&debug" : "";
+
+    console.debug("Adding to history: " + newUrl);
+    history.replaceState({}, "", newUrl);
 }
 
-// connect functions
-urlButton.onclick = processUrlInput;
-urlInput.addEventListener('keydown', (e) => {
-    if (e.key == "Enter") {
-        processUrlInput();
-    }
-})
-
-window.onresize = (e) => {
-    updateGrid();
-}
-
-window.onload = function() {
+function init() {
+    // elements and setup not in the html file
     navigator = document.createElement("div");
     navigator.className = "navigator";
-
     fillSizeSelect();
-    sizeSelect.onchange = onSizeSelectChange;
 
+    // connect to events
+    window.onresize = (e) => {
+        updateGrid();
+    }
+
+    urlButton.onclick = processUrlInput;
+    urlInput.addEventListener('keydown', (e) => {
+        if (e.key == "Enter") {
+            processUrlInput();
+        }
+    })
+
+    autoplayCheckbox.onchange = (change) => {
+        autoplay = autoplayCheckbox.checked;
+        updateUrl();
+    }
+
+    sizeSelect.onchange = onSizeSelectChange;
     editButton.onclick = toggleEditMode;
 
+    // load videos from URL
     processURL();
-    updateGrid()
 }
+
+window.onload = init;
