@@ -57,14 +57,6 @@ function processURL() {
     autoplay = (params.get("autoplay") == "1");
     autoplayCheckbox.checked = autoplay;
 
-    // handle video ids
-    let vValue = params.get("v");
-    if (vValue) {
-        let videoIDs = extractVideoIDs(vValue);
-        console.debug("Loading videos for videoIDs: " + videoIDs);
-        appendVideoBoxesforIds(videoIDs);
-    }
-
     // Handle dim (number of videos on screen will be dim×dim),
     // defaults to the first option
     let dimValue = params.get("dim");
@@ -76,6 +68,14 @@ function processURL() {
         } else {
             sizeSelect.value = dimValue;
         }
+    }
+
+    // handle video ids
+    let vValue = params.get("v");
+    if (vValue) {
+        let videoIDs = extractVideoIDs(vValue);
+        console.debug("Loading videos for videoIDs: " + videoIDs);
+        appendVideoBoxesforIds(videoIDs);
     }
 
     // Add default parameter values to the URL
