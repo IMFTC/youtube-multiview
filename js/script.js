@@ -78,8 +78,7 @@ function processURL() {
         }
     }
 
-    updateGrid();
-    // Show default parameter values to the URL
+    // Add default parameter values to the URL
     updateUrl();
 }
 
@@ -98,12 +97,7 @@ function appendVideoBoxesforIds(idList) {
 
     videoBoxGrid.append(...newVideoBoxes);
 
-    // "all" may require a new layout
-    if (sizeSelect.value == "all") {
-        updateGridColAndRows();
-    }
-
-    updateUrl();
+    updateGrid();
 }
 
 function createVideoBox(id) {
@@ -278,7 +272,7 @@ function processUrlInput() {
     appendVideoBoxesforIds(idList);
 
     urlInput.value = "";
-    updateGrid();
+    updateUrl();
 }
 
 function toggleEditMode() {
