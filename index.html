@@ -9,7 +9,15 @@
   </head>
   <body>
     <div id="video-box-grid">
-      <!-- videoBoxes will go here -->
+      <template id="video-box-template">
+        <link href="css/style.css" rel="stylesheet">
+        <div class="video-box">
+          <iframe frameborder="0" allowfullscreen></iframe>
+          <div class="video-box-overlay">
+            <button class="delete-button">Remove</button>
+          </div>
+        </div>
+      </template>
     </div>
     <div id="settings">
       <div class="setting">

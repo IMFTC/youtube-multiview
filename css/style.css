@@ -52,6 +52,7 @@ button:active, select:active {
 }
 
 button.delete-button {
+    visibility: hidden;
     background: orange;
     position: absolute;
     top: 0;
@@ -109,19 +110,19 @@ a:visited {
     border-color: orange;
 }
 
-.navigator {
+.video-selector {
     display: grid;
     grid-gap: 2px 2px;
     position: absolute;
     padding: 0.5em;
-    top: 0;
+    bottom: 0;
     right: 0;
     background: rgba(0, 0, 0, 0.75);
     padding: 2px;
     z-index: 1000;
 }
 
-.navigator-thumb {
+.video-selector-thumb {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -139,15 +140,15 @@ a:visited {
     background-repeat: no-repeat;
 }
 
-.navigator-thumb.current {
+.video-selector-thumb.current {
     border-color: orange;
 }
 
-.navigator-thumb:hover {
+.video-selector-thumb:hover {
 
 }
 
-.navigator-thumb.current:hover {
+.video-selector-thumb.current:hover {
 
 }
 

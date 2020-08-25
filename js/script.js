@@ -3,7 +3,7 @@ const body = document.querySelector("body");
 
 // a videoBox contains a YouTube iframe and an overlay used to display
 // controls to move videoBoxes inside the videoGrid
-const videoBoxes = document.getElementsByClassName("video-box");
+const videoBoxes = document.getElementsByTagName("video-box");
 // the videoBoxGrid contains all videoBoxes
 const videoBoxGrid = document.getElementById("video-box-grid");
 
@@ -15,7 +15,7 @@ const autoplayCheckbox = document.getElementById("autoplay-checkbox");
 const editButton = document.getElementById("edit-button");
 const sizeSelectValues = ["all", "1x1", "2x2", "3x3", "4x4"];
 
-let navigator = null;
+let videoSelector = null;
 
 // maps n = 0, 1, ... to the n-th videoBox
 const videoBoxOrder = new Map();
@@ -61,7 +61,6 @@ function processURL() {
     // defaults to the first option
     let dimValue = params.get("dim");
     if (dimValue) {
-        console.debug("Handling URL parameter dim=\"" + dimValue + "\"");
         if (sizeSelectValues.indexOf(dimValue) < 0) {
             console.error("Invalid value for dim parameter: " + dimValue
                           + ". Must be one of " + sizeSelectValues);
@@ -82,89 +81,246 @@ function processURL() {
     updateUrl();
 }
 
+class VideoBox extends HTMLElement {
+    constructor(videoid) {
+        super();
+        this.attachShadow({mode: 'open'});
+        this._videoid = videoid;
+        this._order = 0;
+        this._editMode = false;
+        this._highlight = false;
+
+        this.connected = false;
+    }
+
+    // // Exposing the videoid as element attribute is overengineering
+    // // at this point, but let's keep the code around to remember how it works.
+    //
+    // static get observedAttributes() { return ["videoid"]; }
+
+    // attributeChangedCallback(name, oldValue, newValue) {
+    //     console.log("attributeChangedCallback", name, oldValue, newValue);
+    //     if (oldValue == newValue) {
+    //         return;
+    //     }
+
+    //     switch(name) {
+    //     case "videoid":
+    //         this._videoid = newValue;
+    //         break;
+    //     }
+    //     this._updateRendering();
+    // }
+
+    set editMode(newValue) {
+        this._editMode = newValue;
+        this._updateRendering();
+    }
+
+    get editMode() {
+        return this._editMode;
+    }
+
+    set videoid(newValue) {
+        // this.setAttribute("videoid", newValue);
+
+        // remove the following line if using setAttribute above
+        this._videoid = newValue;
+    }
+
+    get videoid() {
+        return this._videoid;
+    }
+
+    set order(newValue) {
+        console.log("setting order to", newValue)
+        this._order = newValue;
+        this._updateRendering();
+    }
+
+    get order() {
+        return this._order;
+    }
+
+    set highlight(newValue) {
+        this._highlight = newValue;
+        this._updateRendering();
+    }
+
+    get highlight() {
+        return this._highlight;
+    }
+
+    set showDeleteButton(show) {
+        this._showDeleteButton = show;
+        this._updateRendering();
+    }
+
+    get showDeleteButton() {
+        return this._showDeleteButton;
+    }
+
+    // postMessage methods are not part of the official API,
+    // we use them to avoid including YouTube scripts in the main document.
+    // Source: [#0]
+    sendCommandToIframe(command, args) {
+        console.log("postMessage to ", this._iframe.contentWindow);
+        this._iframe.contentWindow.postMessage(JSON.stringify({
+            'event': 'command',
+            'func': command,
+            'args': args || []
+        }), '*');
+    }
+
+    playVideo() {
+        this.sendCommandToIframe('playVideo');
+    }
+
+    pauseVideo() {
+        this.sendCommandToIframe('pauseVideo');
+    }
+
+    showVideoSelector() {
+        if (videoSelector.parentNode != this._overlay) {
+            this._overlay.appendChild(videoSelector);
+        }
+
+        while (videoSelector.firstChild) {
+            videoSelector.removeChild(videoSelector.firstChild);
+        }
+
+        let thisIndex = this._order;
+        for (let i = 0; i < videoBoxes.length; i++) {
+            let button = document.createElement("button");
+            button.type = "button";
+            button.classList.add("video-selector-thumb");
+            let ithVideoBox = videoBoxOrder.get(i);
+
+            if (!debug) {
+                let id = ithVideoBox.videoid;
+                button.style["background-image"] = "url(https://img.youtube.com/vi/"
+                    + id + "/sddefault.jpg)";
+            }
+
+            if (i == this._order) {
+                // the button that corresponds to the videoBox in which
+                // the videoSelector currently is
+                button.classList.add("current");
+            } else {
+                button.onclick = (_) => {
+                    this.highlight = true;
+                    this.showDeleteButton = false;
+                    ithVideoBox.highlight = false;
+                    ithVideoBox.showDeleteButton = true;
+                    swapGridElementOrders(videoBoxGrid, thisIndex, i);
+                    // make the videoSelector stay in place
+                    videoBoxOrder.get(thisIndex).showVideoSelector();
+
+                    updateUrl();
+                }
+                button.onmouseenter = (_) => {
+                    ithVideoBox.highlight = true;
+                }
+                button.onmouseleave = (_) => {
+                    ithVideoBox.highlight = false;
+                }
+            }
+            videoSelector.appendChild(button);
+        }
+    }
+
+    _updateRendering() {
+        if (!this.connected)
+            return;
+
+        // hide or show overlay
+        this._overlay.style.visibility = this._editMode ? "visible" : "hidden";
+
+        // hide or show overlay highlight
+        if (this._highlight)
+            this._overlay.classList.add("highlight");
+        else
+            this._overlay.classList.remove("highlight");
+
+        // update CSS order property
+        if (this.style.order !== this._order) {
+            this.style.order = String(this._order);
+        }
+
+        // update iframe
+        let src="https://www.youtube.com/embed/" + this._videoid
+            + "?enablejsapi=1&autoplay=" + (autoplay ? "1" : "0");
+        if (src != this._iframe.src)
+            this._iframe.src = src;
+
+        // hide or show the delete button
+        this._deleteButton.style.visibility
+            = this._showDeleteButton ? "visible" : "hidden";
+    }
+
+    connectedCallback() {
+        if (this.connected)
+            return;
+
+        let templateContent = document.getElementById('video-box-template').content;
+        this.shadowRoot.appendChild(templateContent.cloneNode(true));
+
+        this._iframe = this.shadowRoot.querySelector("iframe");
+        this.addEventListener("message", m => {
+            console.log("message:", m);
+        })
+
+        // overlay
+        this._overlay = this.shadowRoot.querySelector(".video-box-overlay");
+        this._overlay.onmousemove = (mousemove) => {
+            if (videoSelector.parentNode !== this._overlay) {
+                this.showVideoSelector();
+            }
+        }
+        this._overlay.onmouseenter = (mouseenter) => {
+            this.showDeleteButton = true;
+        }
+        this._overlay.onmouseleave = (mouseleave) => {
+            this.showDeleteButton = false;
+        }
+
+        //  deleteButton is a child of this._overlay
+        this._deleteButton = this.shadowRoot.querySelector(".delete-button");
+        this._deleteButton.onclick = () => {
+            deleteVideoBox(this);
+        };
+
+        // update all relevant style properties
+        this.connected = true;
+        this._updateRendering();
+
+        this.playVideo();
+    }
+}
+
+customElements.define('video-box', VideoBox);
+
 function appendVideoBoxesforIds(idList) {
     let edit = editButton.classList.contains("depressed");
 
-    newVideoBoxes = idList.map((id, i) => {
-        let videoBox = createVideoBox(id);
-        videoBox.style.order = videoBoxes.length + i;
-        videoBoxOrder.set(videoBoxes.length + i, videoBox);
-        // set visibility to get events from the overlay
-        videoBox.querySelector(".video-box-overlay")
-            .style.visibility = edit ? "visible" : "hidden";
+    let n = videoBoxes.length;
+    newVideoBoxes = idList.map(id => {
+        let videoBox = new VideoBox(id);
+        videoBox.editMode = edit;
+        videoBox.order = videoBoxOrder.size;
+        videoBoxOrder.set(videoBoxOrder.size, videoBox);
         return videoBox;
     });
+
+    console.debug("newVideoBoxes:", newVideoBoxes);
 
     videoBoxGrid.append(...newVideoBoxes);
 
     updateGrid();
 }
 
-function createVideoBox(id) {
-    let videoBox = document.createElement("div");
-    videoBox.className = "video-box";
-
-    let iframe = createIframeForYouTubeID(id);
-    let overlay = createOverlayForYouTubeID(id);
-    videoBox.appendChild(iframe);
-    videoBox.appendChild(overlay);
-
-    overlay.onmousemove = (mousemove) => {
-        if (navigator.parentNode !== overlay) {
-            moveNavigator(videoBox);
-        }
-    }
-
-    return videoBox;
-}
-
-function createIframeForYouTubeID(id) {
-    let iframe;
-    let src="https://www.youtube.com/embed/" + id
-        + "?autoplay=" + (autoplay ? "1" : "0");
-
-    if (debug) {
-        // use a simple div element as an iframe placeholder
-        iframe = document.createElement("div");
-        iframe.className = "iframe-placeholder";
-        iframe.innerHTML = "&lt;iframe src=" + src + "[...] &gt;";
-    } else {
-        iframe = document.createElement("iframe");
-        iframe.id = id;
-
-        iframe.src=src;
-
-        iframe.frameborder = "0";
-        // iframe.sandbox = "allow-scripts allow-same-origin";
-
-        // The following line is equivalent to calling
-        // iframe.setAttribute("allowfullscreen", ""), see the
-        // 'DOM interface' section at
-        // https://html.spec.whatwg.org/#the-iframe-element.
-        iframe.allowFullscreen = true;
-    }
-    return iframe;
-}
-
-function createOverlayForYouTubeID(id) {
-    let overlay = document.createElement("div");
-    overlay.className = "video-box-overlay";
-    // overlay.innerHTML = id;
-
-    let deleteButton = document.createElement("button");
-    deleteButton.innerHTML = "Remove";
-    deleteButton.className = "delete-button";
-    deleteButton.onclick = (_) => {
-        deleteVideoBox(overlay.parentNode);
-    };
-
-    overlay.appendChild(deleteButton);
-
-    return overlay;
-}
-
 function deleteVideoBox(videoBox) {
-    let n = Number(videoBox.style.order);
+    let n = videoBox.order;
     console.debug("Deleting videoBox number " + n);
 
     videoBoxGrid.removeChild(videoBox);
@@ -172,71 +328,22 @@ function deleteVideoBox(videoBox) {
     // closing the gap at videoBoxOrder.get(n)
     for (let i = n; i < videoBoxes.length; i++) {
         videoBoxOrder.set(i, videoBoxOrder.get(i + 1));
-        videoBoxOrder.get(i).style.order = i;
+        videoBoxOrder.get(i).order = i;
     }
     //  delete previously highest key
     videoBoxOrder.delete(videoBoxes.length);
 
     updateGrid();
 
-    // keep the navigator in place if the deleted videoBox was
+    // keep the videoSelector in place if the deleted videoBox was
     // replaced by a successor
     if (videoBoxOrder.has(n)) {
-        moveNavigator(videoBoxOrder.get(n));
+        videoBoxOrder.get(n).showVideoSelector();
     }
     console.debug("New videoBoxOrder: ", videoBoxOrder);
     updateUrl();
 }
 
-function moveNavigator(videoBox) {
-    let thisOverlay = videoBox.children[1]
-
-    if (navigator.parentNode != thisOverlay) {
-        thisOverlay.appendChild(navigator);
-    }
-
-    while (navigator.firstChild) {
-        navigator.removeChild(navigator.firstChild);
-    }
-
-    let thisIndex = Number(videoBox.style.order);
-
-    for (let i = 0; i < videoBoxes.length; i++) {
-        let button = document.createElement("button");
-        button.type = "button";
-        button.classList.add("navigator-thumb");
-        let overlay =  videoBoxOrder.get(i).querySelector(".video-box-overlay");
-
-        if (!debug) {
-            let id = extractYouTubeID(overlay.parentNode.querySelector("iframe").src);
-            button.style["background-image"] = "url(https://img.youtube.com/vi/" + id + "/sddefault.jpg)";
-        }
-
-        if (i == videoBox.style.order) {
-            // the button that corresponds to the videoBox in which
-            // the navigator currently is
-            button.classList.add("current");
-        } else {
-            button.onclick = (_) => {
-                thisOverlay.classList.add("highlight");
-                overlay.classList.remove("highlight");
-                swapGridElementOrders(videoBoxGrid, thisIndex, i);
-                // make the navigator stay in place
-                moveNavigator(videoBoxOrder.get(thisIndex));
-                updateUrl();
-            }
-            button.onmouseenter = (_) => {
-                overlay.classList.add("highlight");
-            }
-            button.onmouseleave = (_) => {
-                overlay.classList.remove("highlight");
-            }
-        }
-        navigator.appendChild(button);
-    }
-}
-
-// swap two css 'order' attribute values
 function swapGridElementOrders(grid, order1, order2) {
     if (typeof(order1) != "number" || typeof(order2) != "number") {
         console.error("swapGridElementOrders arguments order1, order1 must be numbers");
@@ -250,8 +357,8 @@ function swapGridElementOrders(grid, order1, order2) {
     let videoBox2 = videoBoxOrder.get(order2);
 
     if (videoBox1 && videoBox2) {
-        videoBox1.style.order = order2;
-        videoBox2.style.order = order1;
+        videoBox1.order = order2;
+        videoBox2.order = order1;
 
         videoBoxOrder.set(order1, videoBox2);
         videoBoxOrder.set(order2, videoBox1);
@@ -280,10 +387,10 @@ function toggleEditMode() {
     let edit = !editButton.classList.contains("depressed");
 
     for (let videoBox of videoBoxes) {
-        videoBox.children[1].style.visibility = edit ? "visible" : "hidden";
+        videoBox.editMode = edit;
     }
 
-    navigator.style.visibility = edit ? "visible" : "hidden";
+    videoSelector.style.visibility = edit ? "visible" : "hidden";
     if (edit)  {
         editButton.classList.add("depressed");
     } else {
@@ -303,7 +410,7 @@ function updateGridColAndRows() {
     // ensure enough rows to fill the entire screen
     let nRows = Math.max(Math.ceil(nVideoBoxes / nCols), nCols);
 
-    [videoBoxGrid, navigator].forEach((gridElement) => {
+    [videoBoxGrid, videoSelector].forEach((gridElement) => {
         gridElement.style["grid-template-columns"] = "repeat(" + nCols + ", 1fr)";
         gridElement.style["grid-template-rows"] = "repeat(" + nRows + ", 1fr)";
     })
@@ -339,11 +446,11 @@ function updateGridHeight() {
     videoBoxGrid.style.height = newBoxHeight + "px";
     console.debug("New videoBoxGrid height: " + newBoxHeight);
 
-    // Change navigator width (or height) to half of the rowWidth
-    // (or rowHeight) to always fit the navigator inside the
+    // Change videoSelector width (or height) to half of the rowWidth
+    // (or rowHeight) to always fit the videoSelector inside the
     // overlay.
     let dim = {};
-    let sizeFactor = 1/3;
+    let sizeFactor = 2/3;
     if  (rowWidth / rowHeight < gridWidth / newBoxHeight) {
         // height for width
         dim.width = Math.floor(rowWidth * sizeFactor);
@@ -356,8 +463,8 @@ function updateGridHeight() {
         dim.width = dim.height / newBoxHeight * gridWidth;
     }
 
-    navigator.style.width = dim.width + "px";
-    navigator.style.height = dim.height + "px";
+    videoSelector.style.width = dim.width + "px";
+    videoSelector.style.height = dim.height + "px";
 }
 
 function updateGrid() {
@@ -385,14 +492,8 @@ function updateUrl() {
         newUrl += "?v="
         let ids = [];
         for (let i = 0; i < videoBoxOrder.size; i++) {
-            // get the id from the src property of the iframe
-            let videoBox = videoBoxOrder.get(i);
-            let iframeUrl = (!debug ? videoBox.querySelector("iframe").src
-                             : videoBox.querySelector(".iframe-placeholder").innerText);
-            let id = extractYouTubeID(iframeUrl);
-            ids.push(id);
+            ids.push(videoBoxOrder.get(i).videoid);
         }
-        console.log("Adding ids to v parameter:", ids);
         newUrl += ids.join(",");
     }
 
@@ -405,14 +506,14 @@ function updateUrl() {
     // debug parameter (no values recognized)
     newUrl += debug ? "&debug" : "";
 
-    console.debug("Adding to history: " + newUrl);
+    console.debug("Updating URL: " + newUrl);
     history.replaceState({}, "", newUrl);
 }
 
 function init() {
     // elements and setup not in the html file
-    navigator = document.createElement("div");
-    navigator.className = "navigator";
+    videoSelector = document.createElement("div");
+    videoSelector.className = "video-selector";
     fillSizeSelect();
 
     // connect to events
@@ -440,3 +541,9 @@ function init() {
 }
 
 window.onload = init;
+
+/*
+References
+
+[#0] https://stackoverflow.com/questions/7443578/youtube-iframe-api-how-do-i-control-an-iframe-player-thats-already-in-the-html
+*/
