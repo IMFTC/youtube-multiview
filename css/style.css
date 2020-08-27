@@ -41,6 +41,8 @@ button, select {
     padding: 0.5em;
     background: skyblue;
     color: black;
+    border-style: solid;
+    border-width: 0;
 }
 
 button:hover, select:hover {
@@ -59,8 +61,34 @@ button.delete-button {
     left: 0;
 }
 
+#live-all-button {
+    background: crimson;
+    color: white;
+}
+
 button.depressed {
     background: orange;
+}
+
+.button-group {
+    display: flex;
+    flex-direction: row;
+}
+
+.button-group > button {
+    border-radius: 0px;
+}
+
+.button-group > button + button {
+    margin: 0 0 0 2px;
+}
+
+.button-group > button:first-child {
+    border-radius: 5px 0 0 5px;
+}
+
+.button-group > button:last-child {
+    border-radius: 0 5px 5px 0;
 }
 
 a {
@@ -173,7 +201,6 @@ a:visited {
     justify-content: center;
     align-items: center;
     padding: 5px;
-    white-space: nowrap;
 }
 
 .setting > label {

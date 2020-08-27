@@ -10,6 +10,9 @@ const videoBoxGrid = document.getElementById("video-box-grid");
 // input elements
 const urlInput = document.getElementById("url-input");
 const urlButton = document.getElementById("url-button");
+const playAllButton = document.getElementById("play-all-button");
+const pauseAllButton = document.getElementById("pause-all-button");
+const liveAllButton = document.getElementById("live-all-button");
 const sizeSelect = document.getElementById("size-select");
 const autoplayCheckbox = document.getElementById("autoplay-checkbox");
 const editButton = document.getElementById("edit-button");
@@ -133,7 +136,6 @@ class VideoBox extends HTMLElement {
     }
 
     set order(newValue) {
-        console.log("setting order to", newValue)
         this._order = newValue;
         this._updateRendering();
     }
@@ -164,7 +166,6 @@ class VideoBox extends HTMLElement {
     // we use them to avoid including YouTube scripts in the main document.
     // Source: [#0]
     sendCommandToIframe(command, args) {
-        console.log("postMessage to ", this._iframe.contentWindow);
         this._iframe.contentWindow.postMessage(JSON.stringify({
             'event': 'command',
             'func': command,
@@ -265,10 +266,8 @@ class VideoBox extends HTMLElement {
         let templateContent = document.getElementById('video-box-template').content;
         this.shadowRoot.appendChild(templateContent.cloneNode(true));
 
+        // iframe
         this._iframe = this.shadowRoot.querySelector("iframe");
-        this.addEventListener("message", m => {
-            console.log("message:", m);
-        })
 
         // overlay
         this._overlay = this.shadowRoot.querySelector(".video-box-overlay");
@@ -398,6 +397,30 @@ function toggleEditMode() {
     }
 }
 
+function sendCommandToAllIframes(command, args) {
+    for (let videoBox of videoBoxes)
+        videoBox.sendCommandToIframe(command, args);
+}
+
+function playAllIframes() {
+    sendCommandToAllIframes('playVideo')
+}
+
+function liveAllIframes() {
+    playAllIframes();
+    // XXX: The value for seconds is an arbitrary guess here, not based on any
+    // API, supposedly this should be more one can seek back in the past any live
+    // stream.
+    // Based on https://developers.google.com/youtube/iframe_api_reference#seekTo
+    let seconds = 48 * 3600;
+    let allowSeekAhead = true;
+    sendCommandToAllIframes('seekTo', [seconds, allowSeekAhead])
+}
+
+function pauseAllIframes() {
+    sendCommandToAllIframes('pauseVideo')
+}
+
 // Update grid to have n rows and n columns
 function updateGridColAndRows() {
     let nVideoBoxes = videoBoxGrid.children.length;
@@ -521,6 +544,10 @@ function init() {
         updateGrid();
     }
 
+    playAllButton.onclick = playAllIframes;
+    pauseAllButton.onclick = pauseAllIframes;
+    liveAllButton.onclick = liveAllIframes;
+
     urlButton.onclick = processUrlInput;
     urlInput.addEventListener('keydown', (e) => {
         if (e.key == "Enter") {
@@ -543,7 +570,7 @@ function init() {
 window.onload = init;
 
 /*
-References
+  References
 
-[#0] https://stackoverflow.com/questions/7443578/youtube-iframe-api-how-do-i-control-an-iframe-player-thats-already-in-the-html
+  [#0] https://stackoverflow.com/questions/7443578/youtube-iframe-api-how-do-i-control-an-iframe-player-thats-already-in-the-html
 */

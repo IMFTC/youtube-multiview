@@ -21,7 +21,15 @@
     </div>
     <div id="settings">
       <div class="setting">
-        <label for="url-input">Add Video ID:</label>
+        <label>Control all:</label>
+        <div class="button-group">
+          <button id="play-all-button">Play</button>
+          <button id="pause-all-button">Pause</button>
+          <button id="live-all-button">Live</button>
+        </div>
+      </div>
+      <div class="setting">
+        <label for="url-input">Video URL</label>
         <input type="text"
                id="url-input">
         <button type="button"
@@ -30,8 +38,8 @@
         </button>
       </div>
       <div class="setting">
-        <label for="autoplay-checkbox">Autoplay </label>
-        <input type="checkbox" id="autoplay-checkbox"></select>
+        <label for="autoplay-checkbox">Autoplay</label>
+        <input type="checkbox" id="autoplay-checkbox"></input>
       </div>
       <div class="setting">
         <label for="size-input">Fit on screen:</label>
@@ -51,12 +59,3 @@
     </div>
   </body>
 </html>
-
-
-<!--
-
-Thumbnails for videos in default resolution:
-
-https://img.youtube.com/vi/5QbM7Vsz3kg/sddefault.jpg
-
--->
