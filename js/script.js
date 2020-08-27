@@ -423,7 +423,7 @@ function pauseAllIframes() {
 
 // Update grid to have n rows and n columns
 function updateGridColAndRows() {
-    let nVideoBoxes = videoBoxGrid.children.length;
+    let nVideoBoxes = videoBoxes.length;
     // dim= "nxn" or "all"
     let n = (sizeSelect.value == "all" ?
              Math.ceil(Math.sqrt(nVideoBoxes)) :
@@ -446,7 +446,7 @@ function updateGridColAndRows() {
 function updateGridHeight() {
     let gridWidth = html.clientWidth;
     let screenHeight = html.clientHeight;
-    let nVideoBoxes = videoBoxGrid.children.length;
+    let nVideoBoxes = videoBoxes.length;
 
     // no videoBoxes
     if (nVideoBoxes == 0) {
