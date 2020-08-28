@@ -1,11 +1,11 @@
 const html = document.querySelector("html");
 const body = document.querySelector("body");
 
-// a videoBox contains a YouTube iframe and an overlay used to display
-// controls to move videoBoxes inside the videoGrid
-const videoBoxes = document.getElementsByTagName("video-box");
-// the videoBoxGrid contains all videoBoxes
+// The videoBoxGrid contains all videoBoxes.
 const videoBoxGrid = document.getElementById("video-box-grid");
+// A videoBox contains a YouTube iframe and an overlay used to display
+// controls to move videoBoxes inside the videoGrid.
+const videoBoxes = document.getElementsByTagName("video-box");
 
 // input elements
 const urlInput = document.getElementById("url-input");
@@ -18,13 +18,18 @@ const autoplayCheckbox = document.getElementById("autoplay-checkbox");
 const editButton = document.getElementById("edit-button");
 const sizeSelectValues = ["all", "1x1", "2x2", "3x3", "4x4"];
 
-const eventOverlay = document.getElementById("event-overlay");
+// The settingsBarTrigger has a fixed position at the bottom of the screen and
+// is a few pixels high. It is used to recognize the pointer near the bottom
+// of the window which will make the settingsBar show up.
+const settingsBarTrigger = document.getElementById("event-overlay");
 const settingsBar = document.getElementById("settings");
-
-let videoSelector = null;
-// maps n = 0, 1, ... to the n-th videoBox
+// Maps n = 0, 1, ... to the n-th videoBox.
 const videoBoxOrder = new Map();
 
+// elements produced by code that are not in the .html file
+let videoSelector = null;
+
+// URL parameters that need to be accessed globally
 let debug = false;
 let autoplay = false;
 
@@ -51,22 +56,22 @@ function extractVideoIDs(string) {
     let videoIDs = [];
     // replace any whitespace sequence to one ','
     let ids = string.replace(/\s+/, ',').split(',');
-    return ids.map(extractYouTubeID)
+    return ids.map(extractYouTubeID);
 }
 
-// Resets the page to the settings in the URL
+// Resets the page to the settings in the URL.
 function processURL() {
     let params = new URLSearchParams(document.location.search.substring(1));
     // v is a comma separated list of YouTube video IDs
     debug = params.has("debug");
     console.debug("Debugging mode is " + (debug ? "on" : "off"));
 
-    // start playing videos immediatly?
+    // Start playing videos immediatly?
     autoplay = (params.get("autoplay") == "1");
     autoplayCheckbox.checked = autoplay;
 
     // Handle dim (number of videos on screen will be dim×dim),
-    // defaults to the first option
+    // defaults to the first option.
     let dimValue = params.get("dim");
     if (dimValue) {
         if (sizeSelectValues.indexOf(dimValue) < 0) {
@@ -77,7 +82,7 @@ function processURL() {
         }
     }
 
-    // handle video ids
+    // handle all video ids
     let vValue = params.get("v");
     if (vValue) {
         let videoIDs = extractVideoIDs(vValue);
@@ -85,7 +90,7 @@ function processURL() {
         appendVideoBoxesforIds(videoIDs);
     }
 
-    // Add default parameter values to the URL
+    // add default parameter values to the URL.
     updateUrl();
 }
 
@@ -168,8 +173,8 @@ class VideoBox extends HTMLElement {
     }
 
     // postMessage methods are not part of the official API,
-    // we use them to avoid including YouTube scripts in the main document.
-    // Source: [#0]
+    // we use them to avoid including YouTube scripts in the main document,
+    // see [#0] in the References.
     sendCommandToIframe(command, args) {
         this._iframe.contentWindow.postMessage(JSON.stringify({
             'event': 'command',
@@ -259,7 +264,7 @@ class VideoBox extends HTMLElement {
         if (src != this._iframe.src)
             this._iframe.src = src;
 
-        // hide or show the delete button
+        // hide or show delete button
         this._deleteButton.style.visibility
             = this._showDeleteButton ? "visible" : "hidden";
     }
@@ -334,7 +339,7 @@ function deleteVideoBox(videoBox) {
         videoBoxOrder.set(i, videoBoxOrder.get(i + 1));
         videoBoxOrder.get(i).order = i;
     }
-    //  delete previously highest key
+    // delete previously highest key
     videoBoxOrder.delete(videoBoxes.length);
 
     updateGrid();
@@ -363,7 +368,6 @@ function swapGridElementOrders(grid, order1, order2) {
     if (videoBox1 && videoBox2) {
         videoBox1.order = order2;
         videoBox2.order = order1;
-
         videoBoxOrder.set(order1, videoBox2);
         videoBoxOrder.set(order2, videoBox1);
     }
@@ -402,10 +406,14 @@ function toggleEditMode() {
         editButton.classList.add("depressed");
         settingsBar.classList.add("edit");
         showSettingsBar();
+        // When the mouse leaves the settingsBar while in edit mode it should
+        // not be hidden after scrolling because it contains the Edit Mode
+        // button needed to leave edit mode.
         document.removeEventListener("scroll", onScroll);
     } else {
         settingsBar.classList.remove("edit");
         editButton.classList.remove("depressed");
+        // see above comment
         document.addEventListener("scroll", onScroll);
     }
 }
@@ -433,7 +441,7 @@ function pauseAllIframes() {
     sendCommandToAllIframes('pauseVideo')
 }
 
-// Update grid to have n rows and n columns
+// Update grid to have n rows and n columns.
 function updateGridColAndRows() {
     let nVideoBoxes = videoBoxes.length;
     // dim= "nxn" or "all"
@@ -442,12 +450,13 @@ function updateGridColAndRows() {
              Number(sizeSelect.value[0]))
     let nCols = Math.max(1, n);
 
-    // ensure enough rows to fill the entire screen
+    // Ensure enough rows to fill the entire screen because we don't want the
+    // controls or the footer to be visible by default.
     let nRows = Math.max(Math.ceil(nVideoBoxes / nCols), nCols);
 
-    [videoBoxGrid, videoSelector].forEach((gridElement) => {
-        gridElement.style["grid-template-columns"] = "repeat(" + nCols + ", 1fr)";
-        gridElement.style["grid-template-rows"] = "repeat(" + nRows + ", 1fr)";
+    [videoBoxGrid, videoSelector].forEach((grid) => {
+        grid.style["grid-template-columns"] = "repeat(" + nCols + ", 1fr)";
+        grid.style["grid-template-rows"] = "repeat(" + nRows + ", 1fr)";
     })
 
     console.debug("updateGridColAndRows: Setting dimension to " + nRows + "x" + nCols + ".");
@@ -545,7 +554,7 @@ function updateUrl() {
     history.replaceState({}, "", newUrl);
 }
 
-// show settingsBar and hide again after @timeout ms if @timeout is <= 0,
+// Show settingsBar and hide again after @timeout ms if @timeout is <= 0,
 // don't hide it again at all.
 function showSettingsBar(timeout = 0) {
     if (hideSettingsBarTimeout !== null) {
@@ -613,12 +622,9 @@ function init() {
     editButton.onclick = toggleEditMode;
 
     connectSettingsBarEvents(true);
-
-    document.addEventListener("scroll", onScroll);
-
-    eventOverlay.onmousemove = showSettingsBar;
-
+    settingsBarTrigger.onmousemove = showSettingsBar;
     connectSettingsBarEvents(true);
+    document.addEventListener("scroll", onScroll);
 
     // load videos from URL
     processURL();
