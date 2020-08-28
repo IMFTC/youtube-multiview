@@ -211,7 +211,7 @@ a:visited {
 }
 
 #settings > .setting+.setting {
-    margin-left: 1em;
+    margin-left: 0.5em;
 }
 
 .setting {

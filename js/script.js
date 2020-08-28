@@ -13,9 +13,10 @@ const urlButton = document.getElementById("url-button");
 const playAllButton = document.getElementById("play-all-button");
 const pauseAllButton = document.getElementById("pause-all-button");
 const liveAllButton = document.getElementById("live-all-button");
-const sizeSelect = document.getElementById("size-select");
+const muteAllButton = document.getElementById("mute-all-button");
 const autoplayCheckbox = document.getElementById("autoplay-checkbox");
 const editButton = document.getElementById("edit-button");
+const sizeSelect = document.getElementById("size-select");
 const sizeSelectValues = ["all", "1x1", "2x2", "3x3", "4x4"];
 
 // The settingsBarTrigger has a fixed position at the bottom of the screen and
@@ -441,6 +442,10 @@ function pauseAllIframes() {
     sendCommandToAllIframes('pauseVideo')
 }
 
+function muteAllIframes() {
+    sendCommandToAllIframes('mute');
+}
+
 // Update grid to have n rows and n columns.
 function updateGridColAndRows() {
     let nVideoBoxes = videoBoxes.length;
@@ -605,6 +610,7 @@ function init() {
     playAllButton.onclick = playAllIframes;
     pauseAllButton.onclick = pauseAllIframes;
     liveAllButton.onclick = liveAllIframes;
+    muteAllButton.onclick = muteAllIframes;
 
     urlButton.onclick = processUrlInput;
     urlInput.addEventListener('keydown', (e) => {
