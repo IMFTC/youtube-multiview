@@ -143,11 +143,10 @@ a:visited {
     grid-gap: 2px 2px;
     position: absolute;
     padding: 0.5em;
-    bottom: 0;
+    top: 0;
     right: 0;
     background: rgba(0, 0, 0, 0.75);
     padding: 2px;
-    z-index: 1000;
 }
 
 .video-selector-thumb {
@@ -180,16 +179,35 @@ a:visited {
 
 }
 
+#event-overlay {
+    position: fixed;
+    bottom: 0;
+    height: 5px;
+    width: 100%;
+    background-color: yellow;
+    opacity: 0;
+}
+
 #settings {
+    position: sticky;
+    bottom: 0;
+    width: 100%;
+    background: rgb(240, 240, 240);
+    transition-property: bottom;
+    transition-duration: 0.2s;
+
     display: flex;
     flex-direction: row;
     justify-content: center;
     align-items: center;
-    padding: 10px;
+    padding: 0.5em;
     border-style: solid;
     border-width: 5px 0 0 0;
     border-color: skyblue;
-    padding: 1em;
+}
+
+#settings.edit {
+    border-color: orange;
 }
 
 #settings > .setting+.setting {
@@ -200,7 +218,7 @@ a:visited {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 5px;
+    padding: 0.5em;
 }
 
 .setting > label {
@@ -220,6 +238,9 @@ a:visited {
     width: 100%;
     text-align: center;
     padding: 5px;
+    /* border-width: 5px 0 0 0; */
+    /* border-style: solid; */
+    /* border-color: skyblue; */
 }
 
 #footer b {

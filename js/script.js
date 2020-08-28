@@ -18,13 +18,18 @@ const autoplayCheckbox = document.getElementById("autoplay-checkbox");
 const editButton = document.getElementById("edit-button");
 const sizeSelectValues = ["all", "1x1", "2x2", "3x3", "4x4"];
 
-let videoSelector = null;
+const eventOverlay = document.getElementById("event-overlay");
+const settingsBar = document.getElementById("settings");
 
+let videoSelector = null;
 // maps n = 0, 1, ... to the n-th videoBox
 const videoBoxOrder = new Map();
 
 let debug = false;
 let autoplay = false;
+
+// global timeouts
+let hideSettingsBarTimeout = null;
 
 function fillSizeSelect() {
     sizeSelectValues.forEach(value => {
@@ -384,6 +389,9 @@ function processUrlInput() {
 
 function toggleEditMode() {
     let edit = !editButton.classList.contains("depressed");
+    // in edit mode we don't want to hide the settingsBar automatically since
+    // it contains the Done button
+    connectSettingsBarEvents(!edit);
 
     for (let videoBox of videoBoxes) {
         videoBox.editMode = edit;
@@ -392,8 +400,13 @@ function toggleEditMode() {
     videoSelector.style.visibility = edit ? "visible" : "hidden";
     if (edit)  {
         editButton.classList.add("depressed");
+        settingsBar.classList.add("edit");
+        showSettingsBar();
+        document.removeEventListener("scroll", onScroll);
     } else {
+        settingsBar.classList.remove("edit");
         editButton.classList.remove("depressed");
+        document.addEventListener("scroll", onScroll);
     }
 }
 
@@ -533,6 +546,43 @@ function updateUrl() {
     history.replaceState({}, "", newUrl);
 }
 
+// show settingsBar and hide again after @timeout ms if @timeout is <= 0,
+// don't hide it again at all.
+function showSettingsBar(timeout = 0) {
+    if (hideSettingsBarTimeout !== null) {
+        clearTimeout(hideSettingsBarTimeout);
+        hideSettingsBarTimeout = null;
+    }
+
+    settingsBar.style.bottom = "0";
+    if (timeout > 0) {
+        hideSettingsBarTimeout = setTimeout(hideSettingsBar, timeout);
+    }
+}
+
+function hideSettingsBar() {
+    if (hideSettingsBarTimeout !== null) {
+        clearTimeout(hideSettingsBarTimeout);
+        hideSettingsBarTimeout = null;
+    }
+    settingsBar.style.bottom = -settingsBar.getClientRects()[0].height + "px";
+}
+
+function onScroll(e) {
+    console.log("onScroll, deltaY:", e);
+    showSettingsBar(2000);
+}
+
+function connectSettingsBarEvents(connect) {
+    settingsBar.onmouseenter = connect ? e => {
+        showSettingsBar();
+    }: null;
+    settingsBar.onmouseleave = connect ? e => {
+        // show for two more seconds, then hide again
+        showSettingsBar(2000);
+    }: null;
+}
+
 function init() {
     // elements and setup not in the html file
     videoSelector = document.createElement("div");
@@ -563,8 +613,17 @@ function init() {
     sizeSelect.onchange = onSizeSelectChange;
     editButton.onclick = toggleEditMode;
 
+    connectSettingsBarEvents(true);
+
+    document.addEventListener("scroll", onScroll);
+
+    eventOverlay.onmousemove = showSettingsBar;
+
+    connectSettingsBarEvents(true);
+
     // load videos from URL
     processURL();
+    showSettingsBar(2000);
 }
 
 window.onload = init;
