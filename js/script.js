@@ -421,11 +421,10 @@ function playAllIframes() {
 
 function liveAllIframes() {
     playAllIframes();
-    // XXX: The value for seconds is an arbitrary guess here, not based on any
-    // API, supposedly this should be more one can seek back in the past any live
-    // stream.
+    // Apparently there is no official API for live streams to jump to live
+    // playback, but requesting a large enough numbers appears to work.
     // Based on https://developers.google.com/youtube/iframe_api_reference#seekTo
-    let seconds = 48 * 3600;
+    let seconds = Number.MAX_SAFE_INTEGER;
     let allowSeekAhead = true;
     sendCommandToAllIframes('seekTo', [seconds, allowSeekAhead])
 }
