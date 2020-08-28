@@ -15,7 +15,7 @@ const pauseAllButton = document.getElementById("pause-all-button");
 const liveAllButton = document.getElementById("live-all-button");
 const muteAllButton = document.getElementById("mute-all-button");
 const autoplayCheckbox = document.getElementById("autoplay-checkbox");
-const editButton = document.getElementById("edit-button");
+const arrangeButton = document.getElementById("arrange-button");
 const sizeSelect = document.getElementById("size-select");
 const sizeSelectValues = ["all", "1x1", "2x2", "3x3", "4x4"];
 
@@ -311,7 +311,7 @@ class VideoBox extends HTMLElement {
 customElements.define('video-box', VideoBox);
 
 function appendVideoBoxesforIds(idList) {
-    let edit = editButton.classList.contains("depressed");
+    let edit = arrangeButton.classList.contains("depressed");
 
     let n = videoBoxes.length;
     newVideoBoxes = idList.map(id => {
@@ -393,7 +393,7 @@ function processUrlInput() {
 }
 
 function toggleEditMode() {
-    let edit = !editButton.classList.contains("depressed");
+    let edit = !arrangeButton.classList.contains("depressed");
     // in edit mode we don't want to hide the settingsBar automatically since
     // it contains the Done button
     connectSettingsBarEvents(!edit);
@@ -402,9 +402,11 @@ function toggleEditMode() {
         videoBox.editMode = edit;
     }
 
+    arrangeButton.innerHTML = edit ? "Done" : "Arrange"
+
     videoSelector.style.visibility = edit ? "visible" : "hidden";
     if (edit)  {
-        editButton.classList.add("depressed");
+        arrangeButton.classList.add("depressed");
         settingsBar.classList.add("edit");
         showSettingsBar();
         // When the mouse leaves the settingsBar while in edit mode it should
@@ -413,7 +415,7 @@ function toggleEditMode() {
         document.removeEventListener("scroll", onScroll);
     } else {
         settingsBar.classList.remove("edit");
-        editButton.classList.remove("depressed");
+        arrangeButton.classList.remove("depressed");
         // see above comment
         document.addEventListener("scroll", onScroll);
     }
@@ -602,6 +604,15 @@ function init() {
     videoSelector.className = "video-selector";
     fillSizeSelect();
 
+
+    // check both strings and set a fixed width
+    // fitting both
+    arrangeButton.innerHTML = "Done";
+    let w1 = arrangeButton.clientWidth;
+    arrangeButton.innerHTML = "Arrange";
+    let w2 = arrangeButton.clientWidth;
+    arrangeButton.style.width = Math.max(w1, w2) + "px";
+
     // connect to events
     window.onresize = (e) => {
         updateGrid();
@@ -625,7 +636,7 @@ function init() {
     }
 
     sizeSelect.onchange = onSizeSelectChange;
-    editButton.onclick = toggleEditMode;
+    arrangeButton.onclick = toggleEditMode;
 
     connectSettingsBarEvents(true);
     settingsBarTrigger.onmousemove = showSettingsBar;
