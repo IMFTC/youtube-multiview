@@ -21,36 +21,38 @@
     </div>
     <div id="event-overlay"></div>
     <div id="settings">
-      <div class="setting">
-        <label>Control all:</label>
-        <div class="button-group">
-          <button id="play-all-button">Play</button>
-          <button id="pause-all-button">Pause</button>
-          <button id="live-all-button">Live</button>
+      <div class="left-align">
+        <div class="setting">
+          <label>Control all:</label>
+          <div class="button-group">
+            <button id="play-all-button">Play</button>
+            <button id="pause-all-button">Pause</button>
+            <button id="live-all-button">Live</button>
+          </div>
+          <div class="setting">
+            <button id="mute-all-button">Mute</button>
+          </div>
         </div>
         <div class="setting">
-          <button id="mute-all-button">Mute</button>
+          <label for="url-input">Video URL</label>
+          <input type="text"
+                 id="url-input">
+          <button type="button"
+                  id="url-button">
+            Load
+          </button>
         </div>
-      </div>
-      <div class="setting">
-        <label for="url-input">Video URL</label>
-        <input type="text"
-               id="url-input">
-        <button type="button"
-                id="url-button">
-          Load
-        </button>
-      </div>
-      <div class="setting">
-        <label for="autoplay-checkbox">Autoplay</label>
-        <input type="checkbox" id="autoplay-checkbox">
-      </div>
-      <div class="setting">
-        <label for="size-select">Fit:</label>
-        <select id="size-select"></select>
-      </div>
-      <div class="setting">
-        <button id="arrange-button"></button>
+        <div class="setting">
+          <label for="autoplay-checkbox">Autoplay</label>
+          <input type="checkbox" id="autoplay-checkbox">
+        </div>
+        <div class="setting">
+          <label for="size-select">Fit:</label>
+          <select id="size-select"></select>
+        </div>
+        <div class="setting">
+          <button id="arrange-button"></button>
+        </div>
       </div>
     </div>
     <div id="footer">
