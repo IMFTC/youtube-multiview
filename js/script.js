@@ -17,7 +17,7 @@ const muteAllButton = document.getElementById("mute-all-button");
 const autoplayCheckbox = document.getElementById("autoplay-checkbox");
 const arrangeButton = document.getElementById("arrange-button");
 const sizeSelect = document.getElementById("size-select");
-const sizeSelectValues = ["all", "1x1", "2x2", "3x3", "4x4"];
+const sizeSelectValues = ["all", "1x1", "2x2", "3x3", "4x4", "1plus5"];
 
 // The settingsBarTrigger has a fixed position at the bottom of the screen and
 // is a few pixels high. It is used to recognize the pointer near the bottom
@@ -41,7 +41,7 @@ function fillSizeSelect() {
     sizeSelectValues.forEach(value => {
         let option = document.createElement("option");
         option.value = value;
-        option.innerHTML = value;
+        option.innerHTML = value.replace("plus", "+");
         sizeSelect.appendChild(option);
     });
 }
@@ -239,6 +239,11 @@ class VideoBox extends HTMLElement {
             }
             videoSelector.appendChild(button);
         }
+        if (sizeSelect.value === "1plus5") {
+            let mainButton = videoSelector.firstChild;
+            mainButton.style.gridRow = "1 / 3";
+            mainButton.style.gridColumn = "1 / 3";
+        }
     }
 
     _updateRendering() {
@@ -372,6 +377,25 @@ function swapGridElementOrders(grid, order1, order2) {
         videoBoxOrder.set(order1, videoBox2);
         videoBoxOrder.set(order2, videoBox1);
     }
+
+    if (sizeSelect.value === "1plus5") {
+        console.log("updating styles");
+        if (order2 === 0) {
+            // videoBox1 is the new main
+            videoBox1.style.gridRow = "1 / 3";
+            videoBox1.style.gridColumn = "1 / 3";
+
+            videoBox2.style.gridRow = "";
+            videoBox2.style.gridColumn = "";
+        } else if (order1 === 0) {
+            // videoBox2 is the new main
+            videoBox2.style.gridRow = "1 / 3";
+            videoBox2.style.gridColumn = "1 / 3";
+
+            videoBox1.style.gridRow = "";
+            videoBox1.style.gridColumn = "";
+        }
+    }
 }
 
 function removeAllVideoBoxes() {
@@ -448,14 +472,22 @@ function muteAllIframes() {
     sendCommandToAllIframes('mute');
 }
 
+function getNumberOfRowsAndCols() {
+    switch(sizeSelect.value) {
+    case "all":
+        return Math.max(1, Math.ceil(Math.sqrt(videoBoxes.length)));
+    case "1plus5":
+        return 3;
+    default:
+        // NxN case
+        return Number(sizeSelect.value[0]);
+    }
+}
+
 // Update grid to have n rows and n columns.
 function updateGridColAndRows() {
     let nVideoBoxes = videoBoxes.length;
-    // dim= "nxn" or "all"
-    let n = (sizeSelect.value == "all" ?
-             Math.ceil(Math.sqrt(nVideoBoxes)) :
-             Number(sizeSelect.value[0]))
-    let nCols = Math.max(1, n);
+    let nCols = getNumberOfRowsAndCols();
 
     // Ensure enough rows to fill the entire screen because we don't want the
     // controls or the footer to be visible by default.
@@ -464,6 +496,18 @@ function updateGridColAndRows() {
     [videoBoxGrid, videoSelector].forEach((grid) => {
         grid.style["grid-template-columns"] = "repeat(" + nCols + ", 1fr)";
         grid.style["grid-template-rows"] = "repeat(" + nRows + ", 1fr)";
+
+        let mainVideoBox = videoBoxOrder.get(0);
+        if (mainVideoBox) {
+            if (sizeSelect.value == "1plus5") {
+                mainVideoBox.style.gridRow = "1 / 3";
+                mainVideoBox.style.gridColumn = "1 / 3";
+            } else {
+                // ensure mainVideoBox is a normal videoBox again
+                mainVideoBox.style.gridRow = "";
+                mainVideoBox.style.gridColumn = "";
+            }
+        }
     })
 
     console.debug("updateGridColAndRows: Setting dimension to " + nRows + "x" + nCols + ".");
@@ -483,10 +527,9 @@ function updateGridHeight() {
         return;
     }
 
-    // at least one videoBox
-    let nRowsOnScreen = (sizeSelect.value == "all" ?
-                         Math.ceil(Math.sqrt(nVideoBoxes)) :
-                         Number(sizeSelect.value[0]))
+    // here we have at least one videoBox
+    let nRowsOnScreen = getNumberOfRowsAndCols();
+    console.log("nRowsOnScreen:", nRowsOnScreen);
     let nTotalRows = Math.ceil(nVideoBoxes / nRowsOnScreen);
     let rowHeight = screenHeight / nRowsOnScreen;
     let rowWidth = gridWidth / nRowsOnScreen;
@@ -615,7 +658,7 @@ function init() {
 
     // connect to events
     window.onresize = (e) => {
-        updateGrid();
+        updateGridHeight();
     }
 
     playAllButton.onclick = playAllIframes;
