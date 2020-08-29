@@ -637,7 +637,7 @@ function connectSettingsBarEvents(connect) {
     }: null;
     settingsBar.onmouseleave = connect ? e => {
         // show for two more seconds, then hide again
-        showSettingsBar(2000);
+        showSettingsBar(500);
     }: null;
 }
 
