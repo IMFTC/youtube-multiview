@@ -379,7 +379,6 @@ function swapGridElementOrders(grid, order1, order2) {
     }
 
     if (sizeSelect.value === "1plus5") {
-        console.log("updating styles");
         if (order2 === 0) {
             // videoBox1 is the new main
             videoBox1.style.gridRow = "1 / 3";
@@ -530,7 +529,6 @@ function updateGridHeight() {
 
     // here we have at least one videoBox
     let nRowsOnScreen = getNumberOfRowsAndCols();
-    console.log("nRowsOnScreen:", nRowsOnScreen);
     let nTotalRows = Math.ceil(nVideoBoxes / nRowsOnScreen);
     let rowHeight = screenHeight / nRowsOnScreen;
     let rowWidth = gridWidth / nRowsOnScreen;
@@ -540,6 +538,7 @@ function updateGridHeight() {
 
     videoBoxGrid.style.height = newBoxHeight + "px";
     console.debug("New videoBoxGrid height: " + newBoxHeight);
+    console.debug("Grid rows on screen: " + nRowsOnScreen);
 
     // Change videoSelector width (or height) to half of the rowWidth
     // (or rowHeight) to always fit the videoSelector inside the
@@ -628,7 +627,6 @@ function hideSettingsBar() {
 }
 
 function onScroll(e) {
-    console.log("onScroll, deltaY:", e);
     showSettingsBar(2000);
 }
 
