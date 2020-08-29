@@ -493,22 +493,23 @@ function updateGridColAndRows() {
     // controls or the footer to be visible by default.
     let nRows = Math.max(Math.ceil(nVideoBoxes / nCols), nCols);
 
-    [videoBoxGrid, videoSelector].forEach((grid) => {
+    [videoBoxGrid, videoSelector].forEach(grid => {
         grid.style["grid-template-columns"] = "repeat(" + nCols + ", 1fr)";
         grid.style["grid-template-rows"] = "repeat(" + nRows + ", 1fr)";
+    });
 
-        let mainVideoBox = videoBoxOrder.get(0);
-        if (mainVideoBox) {
-            if (sizeSelect.value == "1plus5") {
-                mainVideoBox.style.gridRow = "1 / 3";
-                mainVideoBox.style.gridColumn = "1 / 3";
-            } else {
-                // ensure mainVideoBox is a normal videoBox again
-                mainVideoBox.style.gridRow = "";
-                mainVideoBox.style.gridColumn = "";
-            }
+    // work needed to switch between 1plus5 and any other modes
+    let mainVideoBox = videoBoxOrder.get(0);
+    if (mainVideoBox) {
+        if (sizeSelect.value == "1plus5") {
+            mainVideoBox.style.gridRow = "1 / 3";
+            mainVideoBox.style.gridColumn = "1 / 3";
+        } else {
+            // ensure mainVideoBox is a normal videoBox again
+            mainVideoBox.style.gridRow = "";
+            mainVideoBox.style.gridColumn = "";
         }
-    })
+    }
 
     console.debug("updateGridColAndRows: Setting dimension to " + nRows + "x" + nCols + ".");
 }
