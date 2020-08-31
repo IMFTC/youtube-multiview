@@ -103,8 +103,7 @@ class VideoBox extends HTMLElement {
         this._order = 0;
         this._editMode = false;
         this._highlight = false;
-
-        this.connected = false;
+        this._connected = false;
         // html attributes
         this.tabIndex = 1;
     }
@@ -256,7 +255,7 @@ class VideoBox extends HTMLElement {
     }
 
     _updateRendering() {
-        if (!this.connected)
+        if (!this._connected)
             return;
 
         // hide or show overlay
@@ -285,7 +284,7 @@ class VideoBox extends HTMLElement {
     }
 
     connectedCallback() {
-        if (this.connected)
+        if (this._connected)
             return;
 
         let templateContent = document.getElementById('video-box-template').content;
@@ -315,7 +314,7 @@ class VideoBox extends HTMLElement {
         };
 
         // update all relevant style properties
-        this.connected = true;
+        this._connected = true;
         this._updateRendering();
 
         this.playVideo();
