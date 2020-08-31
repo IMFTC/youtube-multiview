@@ -210,7 +210,7 @@ class VideoBox extends HTMLElement {
 
             if (!debug) {
                 let id = ithVideoBox.videoid;
-                button.style["background-image"] = "url(https://img.youtube.com/vi/"
+                button.style.BackgroundImage = "url(https://img.youtube.com/vi/"
                     + id + "/sddefault.jpg)";
             }
 
@@ -493,8 +493,8 @@ function updateGridColAndRows() {
     let nRows = Math.max(Math.ceil(nVideoBoxes / nCols), nCols);
 
     [videoBoxGrid, videoSelector].forEach(grid => {
-        grid.style["grid-template-columns"] = "repeat(" + nCols + ", 1fr)";
-        grid.style["grid-template-rows"] = "repeat(" + nRows + ", 1fr)";
+        grid.style.gridTemplateColumns = "repeat(" + nCols + ", 1fr)";
+        grid.style.gridTemplateRows = "repeat(" + nRows + ", 1fr)";
     });
 
     // work needed to switch between 1plus5 and any other modes
