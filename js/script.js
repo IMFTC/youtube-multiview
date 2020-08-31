@@ -105,6 +105,8 @@ class VideoBox extends HTMLElement {
         this._highlight = false;
 
         this.connected = false;
+        // html attributes
+        this.tabIndex = 1;
     }
 
     // // Exposing the videoid as element attribute is overengineering
@@ -146,8 +148,15 @@ class VideoBox extends HTMLElement {
         return this._videoid;
     }
 
+    // The reason for setting the order attribute instead of actually swapping
+    // element positions in the DOM (which is usually the preferred way) is
+    // that swapping removes the elements from the DOM and reloads the
+    // iframes, which prevents moving iframes around without stopping and
+    // reloading.
     set order(newValue) {
         this._order = newValue;
+        // + 1 here to ensure tabIndex > 0
+        this.tabIndex = newValue + 1;
         this._updateRendering();
     }
 
