@@ -210,7 +210,7 @@ class VideoBox extends HTMLElement {
 
             if (!debug) {
                 let id = ithVideoBox.videoid;
-                button.style.BackgroundImage = "url(https://img.youtube.com/vi/"
+                button.style.backgroundImage = "url(https://img.youtube.com/vi/"
                     + id + "/sddefault.jpg)";
             }
 
