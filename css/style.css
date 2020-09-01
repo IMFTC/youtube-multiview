@@ -179,7 +179,7 @@ a:visited {
 
 }
 
-#event-overlay {
+#settings-trigger {
     position: fixed;
     bottom: 0;
     height: 5px;

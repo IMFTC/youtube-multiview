@@ -19,11 +19,11 @@ const arrangeButton = document.getElementById("arrange-button");
 const sizeSelect = document.getElementById("size-select");
 const sizeSelectValues = ["all", "1x1", "2x2", "3x3", "4x4", "1plus5"];
 
-// The settingsBarTrigger has a fixed position at the bottom of the screen and
+// The settingsTrigger has a fixed position at the bottom of the screen and
 // is a few pixels high. It is used to recognize the pointer near the bottom
-// of the window which will make the settingsBar show up.
-const settingsBarTrigger = document.getElementById("event-overlay");
-const settingsBar = document.getElementById("settings");
+// of the window which will make the settings show up.
+const settingsTrigger = document.getElementById("settings-trigger");
+const settings = document.getElementById("settings");
 // Maps n = 0, 1, ... to the n-th videoBox.
 const videoBoxOrder = new Map();
 
@@ -427,7 +427,7 @@ function processUrlInput() {
 
 function toggleEditMode() {
     let edit = !arrangeButton.classList.contains("depressed");
-    // in edit mode we don't want to hide the settingsBar automatically since
+    // in edit mode we don't want to hide the settings automatically since
     // it contains the Done button
     connectSettingsBarEvents(!edit);
 
@@ -440,14 +440,14 @@ function toggleEditMode() {
     videoSelector.style.visibility = edit ? "visible" : "hidden";
     if (edit)  {
         arrangeButton.classList.add("depressed");
-        settingsBar.classList.add("edit");
+        settings.classList.add("edit");
         showSettingsBar();
-        // When the mouse leaves the settingsBar while in edit mode it should
+        // When the mouse leaves the settings while in edit mode it should
         // not be hidden after scrolling because it contains the Edit Mode
         // button needed to leave edit mode.
         document.removeEventListener("scroll", onScroll);
     } else {
-        settingsBar.classList.remove("edit");
+        settings.classList.remove("edit");
         arrangeButton.classList.remove("depressed");
         // see above comment
         document.addEventListener("scroll", onScroll);
@@ -614,7 +614,7 @@ function updateUrl() {
     history.replaceState({}, "", newUrl);
 }
 
-// Show settingsBar and hide again after @timeout ms if @timeout is <= 0,
+// Show settings and hide again after @timeout ms if @timeout is <= 0,
 // don't hide it again at all.
 function showSettingsBar(timeout = 0) {
     if (hideSettingsBarTimeout !== null) {
@@ -622,7 +622,7 @@ function showSettingsBar(timeout = 0) {
         hideSettingsBarTimeout = null;
     }
 
-    settingsBar.style.bottom = "0";
+    settings.style.bottom = "0";
     if (timeout > 0) {
         hideSettingsBarTimeout = setTimeout(hideSettingsBar, timeout);
     }
@@ -633,7 +633,7 @@ function hideSettingsBar() {
         clearTimeout(hideSettingsBarTimeout);
         hideSettingsBarTimeout = null;
     }
-    settingsBar.style.bottom = -settingsBar.getClientRects()[0].height + "px";
+    settings.style.bottom = -settings.getClientRects()[0].height + "px";
 }
 
 function onScroll(e) {
@@ -641,11 +641,11 @@ function onScroll(e) {
 }
 
 function connectSettingsBarEvents(connect) {
-    settingsBar.onmouseenter = connect ? e => {
+    settings.onmouseenter = connect ? e => {
         showSettingsBar();
     }: null;
-    settingsBar.onmouseleave = connect ? e => {
-        // hide settingsBar after a short timeout
+    settings.onmouseleave = connect ? e => {
+        // hide settings after a short timeout
         showSettingsBar(500);
     }: null;
 }
@@ -691,7 +691,7 @@ function init() {
     arrangeButton.onclick = toggleEditMode;
 
     connectSettingsBarEvents(true);
-    settingsBarTrigger.onmousemove = showSettingsBar;
+    settingsTrigger.onmousemove = showSettingsBar;
     connectSettingsBarEvents(true);
     document.addEventListener("scroll", onScroll);
 
