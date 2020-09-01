@@ -55,7 +55,7 @@ function extractYouTubeID(url){
 //  whitespace and returns an array containing only the video IDs.
 function extractVideoIDs(string) {
     let videoIDs = [];
-    // replace any whitespace sequence to one ','
+    // replace each whitespace sequence with one comma
     let ids = string.replace(/\s+/, ',').split(',');
     return ids.map(extractYouTubeID);
 }
@@ -63,7 +63,6 @@ function extractVideoIDs(string) {
 // Resets the page to the settings in the URL.
 function processURL() {
     let params = new URLSearchParams(document.location.search.substring(1));
-    // v is a comma separated list of YouTube video IDs
     debug = params.has("debug");
     console.debug("Debugging mode is " + (debug ? "on" : "off"));
 
@@ -72,18 +71,21 @@ function processURL() {
     autoplayCheckbox.checked = autoplay;
 
     // Handle dim (number of videos on screen will be dim×dim),
-    // defaults to the first option.
+    // defaults to sizeSelectValues[0].
     let dimValue = params.get("dim");
     if (dimValue) {
         if (sizeSelectValues.indexOf(dimValue) < 0) {
-            console.error("Invalid value for dim parameter: " + dimValue
-                          + ". Must be one of " + sizeSelectValues);
+            console.error(`Invalid value '${dimValue}' for dim parameter. ` +
+                          `Must be one of${sizeSelectValues.map(s => " '" + s + "'")}. ` +
+                          `Falling back to '${sizeSelectValues[0]}'.`);
+            sizeSelect.value = sizeSelectValues[0];
         } else {
             sizeSelect.value = dimValue;
         }
     }
 
-    // handle all video ids
+    // Handle v, the value of v is a comma separated list of YouTube
+    // video IDs.
     let vValue = params.get("v");
     if (vValue) {
         let videoIDs = extractVideoIDs(vValue);
