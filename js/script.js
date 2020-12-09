@@ -184,8 +184,8 @@ class VideoBox extends HTMLElement {
     }
 
     // postMessage methods are not part of the official API,
-    // we use them to avoid including YouTube scripts in the main document,
-    // see [#0] in the References.
+    // we use them to avoid including YouTube scripts in the main document.
+    // Taken from https://stackoverflow.com/questions/7443578/youtube-iframe-api-how-do-i-control-an-iframe-player-thats-already-in-the-html
     sendCommandToIframe(command, args) {
         this._iframe.contentWindow.postMessage(JSON.stringify({
             'event': 'command',
@@ -701,9 +701,3 @@ function init() {
 }
 
 window.onload = init;
-
-/*
-  References
-
-  [#0] https://stackoverflow.com/questions/7443578/youtube-iframe-api-how-do-i-control-an-iframe-player-thats-already-in-the-html
-*/
